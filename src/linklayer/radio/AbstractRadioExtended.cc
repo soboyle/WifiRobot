@@ -94,8 +94,8 @@ void AbstractRadioExtended::initialize(int stage)
         else
         {
         	if (par("attenuationModel").stdstringValue ()=="tworay")
-               	receptionModel = createReceptionModelTwoRay();
-        	if (par("attenuationModel").stdstringValue ()=="pathlost")
+        		receptionModel = createReceptionModelTwoRay();
+        	else if (par("attenuationModel").stdstringValue ()=="pathlost")
         		receptionModel = createReceptionModelPathLost();
         	else
         		receptionModel = createReceptionModel();
