@@ -64,7 +64,7 @@ void ManetManager::initialize(int stage)
 			if (par("AUTOASSIGN_ADDRESS"))
 			{
 				IPAddress AUTOASSIGN_ADDRESS_BASE(par("AUTOASSIGN_ADDRESS_BASE").stringValue());
-				if (AUTOASSIGN_ADDRESS_BASE.getInt() != 0)
+				if (AUTOASSIGN_ADDRESS_BASE.getInt() == 0)
 					opp_error("ManetManager needs AUTOASSIGN_ADDRESS_BASE to be set to 0.0.0.0");
 				IInterfaceTable *ift = InterfaceTableAccess ().get();
 				IPAddress myAddr (AUTOASSIGN_ADDRESS_BASE.getInt() + uint32(getParentModule()->getId()));
