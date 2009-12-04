@@ -43,7 +43,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+<entry excluding="underTest" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -450,7 +450,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+<entry excluding="underTest" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
