@@ -989,48 +989,52 @@ bool NS_CLASS getDestAddress(cPacket *msg,Uint128 &dest)
 
 }
 
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &ifaceIndex,const int &hops)
+bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &ifaceIndex,const int &hops,const Uint128 &mask)
 {
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
 	destAddr.s_addr = dest;
 	nextAddr.s_addr = add;
+	bool status=true;
+	bool delEntry = (add == (Uint128)0);
+
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
 
-	omnet_chg_rte (dest,dest,dest,1,true);
 	if (fwd_rt!=NULL)
 		rt_table_delete(fwd_rt);
-	if (add == (Uint128)0)
-		return true;
+
 	if (ifaceIndex>=getNumInterfaces())
-		return false;
-	Uint128 mask = add.getIPAddress().getNetworkMask().getInt();
-	omnet_chg_rte(dest, add,mask, hops,false,ifaceIndex);
-	return (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, ifaceIndex)!=NULL);
+		status = false;
+	if (!delEntry && ifaceIndex<getNumInterfaces())
+		status = (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, ifaceIndex)!=NULL);
+	ManetRoutingBase::setRoute(dest,add,ifaceIndex,hops,mask);
+	return status;
 }
 
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifaceName,const int &hops)
+bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifaceName,const int &hops,const Uint128 &mask)
 {
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
 	destAddr.s_addr = dest;
 	nextAddr.s_addr = add;
+	bool status=true;
+	int index;
+	bool delEntry = (add == (Uint128)0);
+
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
-	omnet_chg_rte (dest,dest,dest,1,true);
 
 	if (fwd_rt!=NULL)
 		rt_table_delete(fwd_rt);
-	if (add == (Uint128)0)
-		return true;
-
-	int index;
 	for (index = 0; index <getNumInterfaces(); index++)
 	{
 		if (strcmp(ifaceName, getInterfaceEntry(index)->getName())==0) break;
 	}
 	if (index>=getNumInterfaces())
-		return false;
-	Uint128 mask = add.getIPAddress().getNetworkMask().getInt();
-	omnet_chg_rte(dest, add,mask, hops,false,index);
-	return (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, index)!=NULL);
+		status = false;
+
+	if (!delEntry && index<getNumInterfaces())
+		status = (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, index)!=NULL);
+
+	ManetRoutingBase::setRoute(dest,add,index,hops,mask);
+	return status;
 }

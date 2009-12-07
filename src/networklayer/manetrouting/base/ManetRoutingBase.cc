@@ -918,3 +918,89 @@ double ManetRoutingBase::getSpeed()
 	double distance = sqrt((x*x)+(y*y));
 	return distance/time;
 }
+
+
+bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextHop,const int &ifaceIndex,const int &hops,const Uint128 &mask)
+{
+	/* Add route to kernel routing table ... */
+	IPAddress desAddress((uint32_t)destination);
+	IPRoute *entry=NULL;
+
+	bool del_entry = (nextHop == (Uint128)0);
+
+	if (mac_layer_)
+		return true;
+
+	if (ifaceIndex>=getNumInterfaces())
+		return false;
+
+	bool found = false;
+	for (int i=inet_rt->getNumRoutes(); i>0 ; --i)
+	{
+		const IPRoute *e = inet_rt->getRoute(i-1);
+		if (desAddress == e->getHost())
+		{
+			if (del_entry && !found)
+			{
+				if (!inet_rt->deleteRoute(e))
+					opp_error ("ManetRoutingBase::setRoute can't delete route entry");
+			}
+			else
+			{
+				found = true;
+				entry = const_cast<IPRoute*>(e);
+			}
+		}
+	}
+
+
+	if (del_entry)
+	   return true;
+
+	if (!found)
+		entry = new   IPRoute();
+
+	IPAddress netmask((uint32_t)mask);
+	IPAddress gateway((uint32_t)nextHop);
+	if (mask==(Uint128)0)
+		netmask = desAddress.getNetworkMask().getInt();
+
+	/// Destination
+	entry->setHost(desAddress);
+	/// Route mask
+	entry->setNetmask (netmask);
+	/// Next hop
+	entry->setGateway (gateway);
+	/// Metric ("cost" to reach the destination)
+	entry->setMetric(hops);
+	/// Interface name and pointer
+
+	entry->setInterface(getWlanInterfaceEntry(ifaceIndex));
+
+	/// Route type: Direct or Remote
+	if(entry->getGateway().isUnspecified())
+		entry->setType (IPRoute::DIRECT);
+	else
+		entry->setType (IPRoute::REMOTE);
+	/// Source of route, MANUAL by reading a file,
+	/// routing protocol name otherwise
+	entry->setSource(IPRoute::MANUAL);
+
+	if (!found)
+		inet_rt->addRoute(entry);
+	return true;
+
+}
+
+bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextHop,const char *ifaceName,const int &hops,const Uint128 &mask)
+{
+	/* Add route to kernel routing table ... */
+	int index;
+	for (index = 0; index <getNumInterfaces(); index++)
+	{
+		if (strcmp(ifaceName, getInterfaceEntry(index)->getName())==0) break;
+	}
+	if (index>=getNumInterfaces())
+		return false;
+	return setRoute (destination,nextHop,index,hops,mask);
+};
