@@ -43,7 +43,7 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
 			OLSR_link_tuple *tupleAux = find_sym_link_tuple (iface_assoc_tuple->iface_addr(), now);
 			if (tupleAux == NULL)
 				continue;
-			OLSR_ETX_link_tuple* tuple = 
+			OLSR_ETX_link_tuple* tuple =
 				dynamic_cast<OLSR_ETX_link_tuple*> (tupleAux);
 			if (best == NULL)
 				best = tuple;
@@ -51,7 +51,7 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
 				if (parameter->link_delay()) {
 					if (tuple->nb_link_delay() < best->nb_link_delay())
 						best = tuple;
-        			} 
+        			}
 				else {
 					switch (parameter->link_quality()) {
 						case OLSR_ETX_BEHAVIOR_ETX:
@@ -73,6 +73,10 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
 		}
 	}
 	if (best == NULL)
-		best = check_and_cast<OLSR_ETX_link_tuple*>(find_sym_link_tuple (main_addr, now));
+	{
+		OLSR_link_tuple *tuple = find_sym_link_tuple (main_addr, now);
+		if (tuple!=NULL)
+			best = check_and_cast<OLSR_ETX_link_tuple*>(tuple);
+	}
 	return best;
   }
