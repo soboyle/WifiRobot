@@ -2296,7 +2296,7 @@ OLSR_ETX::~OLSR_ETX()
 		cancelAndDelete(&link_quality_timer_);
 	*/
 	cancelAndDelete(timerMessage);
-	int size = timerQueuePtr->size();
+	//int size = timerQueuePtr->size();
 	for  (TimerQueue::iterator it = timerQueuePtr->begin();it!=timerQueuePtr->end();it++)
 	{
 		OLSR_Timer * timer = it->second;
