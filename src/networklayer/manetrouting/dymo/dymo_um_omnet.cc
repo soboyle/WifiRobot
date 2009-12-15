@@ -1192,10 +1192,9 @@ void DYMOUM::packetFailed(IPDatagram *dgram)
 	  ip_to_str(next_hop), ip_to_str(dest_addr), ch->uid());
 */
 //		rtable_expire_timeout_all(next_hop, NS_IFINDEX);
-
-		dlist_head_t *pos;
 		int count = 0;
 #ifndef MAPROUTINGTABLE
+		dlist_head_t *pos;
 		dlist_for_each(pos, &rtable.l)
 		{
 			rtable_entry_t *entry = (rtable_entry_t *) pos;
