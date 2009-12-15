@@ -78,3 +78,4 @@ bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPAddress& multicastAddre
             return true;
     return false;
 }
+

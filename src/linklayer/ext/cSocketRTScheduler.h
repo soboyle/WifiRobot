@@ -46,13 +46,13 @@ class cSocketRTScheduler : public cScheduler
         virtual int receiveUntil(const timeval& targetTime);
     public:
         /**
-* Constructor.
-*/
+         * Constructor.
+         */
         cSocketRTScheduler();
 
         /**
-* Destructor.
-*/
+         * Destructor.
+         */
         virtual ~cSocketRTScheduler();
 #ifdef HAVE_PCAP
         static std::vector<cModule *> modules;
@@ -63,38 +63,37 @@ class cSocketRTScheduler : public cScheduler
         static timeval baseTime;
 
         /**
-* Called at the beginning of a simulation run.
-*/
+         * Called at the beginning of a simulation run.
+         */
         virtual void startRun();
 
         /**
-* Called at the end of a simulation run.
-*/
+         * Called at the end of a simulation run.
+         */
         virtual void endRun();
 
         /**
-* Recalculates "base time" from current wall clock time.
-*/
+         * Recalculates "base time" from current wall clock time.
+         */
         virtual void executionResumed();
 
         /**
-* To be called from the module which wishes to receive data from the
-* socket. The method must be called from the module's initialize()
-* function.
-*/
+         * To be called from the module which wishes to receive data from the
+         * socket. The method must be called from the module's initialize()
+         * function.
+         */
         void setInterfaceModule(cModule *mod, const char *dev, const char *filter);
 
         /**
-* Scheduler function -- it comes from cScheduler interface.
-*/
+         * Scheduler function -- it comes from cScheduler interface.
+         */
         virtual cMessage *getNextEvent();
 
         /**
-* Send on the currently open connection
-*/
+         * Send on the currently open connection
+         */
         void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
 
 #endif
-
 

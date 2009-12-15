@@ -58,6 +58,8 @@ void ChannelAccess::initialize(int stage)
  */
 void ChannelAccess::sendToChannel(AirFrame *msg)
 {
+    coreEV << "sendToChannel: sending to gates\n";
+
 	// delegate it to ChannelControl
 	cc->sendToChannel(this, myHostRef, msg);
 }
