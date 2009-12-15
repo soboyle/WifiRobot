@@ -69,8 +69,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 		 simtime_t posTimer;
 		 simtime_t posTimerPrev;
 		 bool   regPosition;
-
-
+		 bool   usetManetLabelRouting;
+		 bool   isRegistered;
+		 void *commonPtr;
 
 		 typedef struct InterfaceIdentification
 		 {
@@ -88,7 +89,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 		 cMessage *timerMessagePtr;
 	protected:
 		~ManetRoutingBase();
-		ManetRoutingBase(){regPosition=false; mac_layer_ = false;timerMessagePtr=NULL;timerMultiMapPtr=NULL;}
+		ManetRoutingBase(){isRegistered= false; regPosition=false; mac_layer_ = false;timerMessagePtr=NULL;timerMultiMapPtr=NULL;commonPtr=NULL;}
 
 ////////////////////////////////////////////
 ////////////////////////////////////////////
@@ -182,7 +183,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 //  The timeval should only be interpreted as number of seconds and
 //  fractions of seconds since the start of the simulation.
 //
-		int gettimeofday(struct timeval *, struct timezone *);
+		virtual int gettimeofday(struct timeval *, struct timezone *);
 
 ////////////////////////
 //   Information access routines
@@ -191,25 +192,25 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 //
 //      get the address of the first wlan interface
 //
-		Uint128 getAddress() const {return hostAddress;}
-		Uint128 getRouterId() const {return routerId;}
+		virtual Uint128 getAddress() const {return hostAddress;}
+		virtual Uint128 getRouterId() const {return routerId;}
 //
 // Return true if the routing protocols is execure in the mac layer
 //
-		bool isInMacLayer() const {return mac_layer_;}
+		virtual bool isInMacLayer() const {return mac_layer_;}
 
 //
 // get the i-esime interface
 //
-		InterfaceEntry * getInterfaceEntry (int index) const {return inet_ift->getInterface(index);}
+		virtual InterfaceEntry * getInterfaceEntry (int index) const {return inet_ift->getInterface(index);}
 //
 // Total number of interfaces
 //
-		int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
+		virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
 // Check if the address is local
-		bool isIpLocalAddress (const IPAddress& dest) const;
-		bool isLocalAddress (const Uint128& dest) const;
+		virtual bool isIpLocalAddress (const IPAddress& dest) const;
+		virtual bool isLocalAddress (const Uint128& dest) const;
 
 ///////////////
 // wlan Interface access routines
@@ -218,39 +219,41 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 //
 // Get the index of interface with the same address that add
 //
-		int getWlanInterfaceIndexByAddress (Uint128 =0);
+		virtual int getWlanInterfaceIndexByAddress (Uint128 =0);
 
 //
 // Get the interface with the same address that add
 //
-		InterfaceEntry * getInterfaceWlanByAddress (Uint128 =0) const;
+		virtual InterfaceEntry * getInterfaceWlanByAddress (Uint128 =0) const;
 
 //
 // get number wlan interfaces
 //
-		int getNumWlanInterfaces() const {return interfaceVector.size();}
+		virtual int getNumWlanInterfaces() const {return interfaceVector.size();}
 //
 // Get the index used in the general interface table
 //
-		int getWlanInterfaceIndex (int i) const;
+		virtual int getWlanInterfaceIndex (int i) const;
 //
 // Get the i-esime wlan interface
 //
-		InterfaceEntry *getWlanInterfaceEntry (int i) const;
+		virtual InterfaceEntry *getWlanInterfaceEntry (int i) const;
+
+		virtual bool isThisInterfaceRegistered(InterfaceEntry *);
 
 //
 // DSDV routines
 //
 //
-		void setTimeToLiveRoutingEntry(simtime_t a){inet_rt->setTimeToLiveRoutingEntry(a);}
-		simtime_t getTimeToLiveRoutingEntry()  const {return inet_rt->getTimeToLiveRoutingEntry();}
+		virtual void setTimeToLiveRoutingEntry(simtime_t a){inet_rt->setTimeToLiveRoutingEntry(a);}
+		virtual simtime_t getTimeToLiveRoutingEntry()  const {return inet_rt->getTimeToLiveRoutingEntry();}
 
 //
 //     Access to the node position
 //
-		double getXPos();
-		double getYPos();
-		double getSpeed();
+		virtual double getXPos();
+		virtual double getYPos();
+		virtual double getSpeed();
 
 	public:
 // Routing information access
@@ -262,7 +265,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 		virtual bool isProactive()=0;
 		virtual bool isOurType(cPacket *)=0;
 		virtual bool getDestAddress(cPacket *,Uint128 &)=0;
-		TimerMultiMap *getTimerMultimMap()const {return timerMultiMapPtr;}
+		virtual TimerMultiMap *getTimerMultimMap()const {return timerMultiMapPtr;}
+		virtual void setPtr(void *ptr){commonPtr=ptr;}
+		virtual const void * getPtr()const{return commonPtr;}
 
 };
 

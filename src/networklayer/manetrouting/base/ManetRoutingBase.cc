@@ -82,7 +82,17 @@ void ManetTimer::resched(simtime_t time)
 	agent_->getTimerMultimMap()->insert(std::pair<simtime_t, ManetTimer *>(time,this));
 }
 
-
+bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
+{
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+	for (unsigned int i=0;i<interfaceVector.size();i++)
+   	{
+   		 if (interfaceVector[i].interfacePtr==ie)
+   			 return true;
+   	}
+	return false;
+}
 
 void ManetRoutingBase::registerRoutingModule()
 {
@@ -91,31 +101,70 @@ void ManetRoutingBase::registerRoutingModule()
 	const char *name;
 
  	/* Set host parameters */
+	isRegistered = true;
 	int  num_80211=0;
 	inet_rt = RoutingTableAccess ().get();
 	inet_ift = InterfaceTableAccess ().get();
 	nb = NotificationBoardAccess().get();
-
-	for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+	const char *classname = getParentModule()->getClassName();
+	mac_layer_=false;
+	if (strcmp(classname,"Ieee80211Mesh")==0)
 	{
-		ie = inet_ift->getInterface(i);
-		name = ie->getName();
-		if (strstr (name,"wlan")!=NULL)
-		{
-			i_face = ie;
-			InterfaceIdentification interface;
-			interface.interfacePtr = ie;
-			interface.index = i;
-			num_80211++;
-			interfaceVector.push_back(interface);
-		}
+		mac_layer_=true;
 	}
-    const char *destAddrs = par("ExcludedInterfaces");
-    cStringTokenizer tokenizer(destAddrs);
+
+	usetManetLabelRouting = par("usetManetLabelRouting");
+
+    const char *interfaces = par("interfaces");
+    cStringTokenizer tokenizerInterfaces(interfaces);
     const char *token;
-	if (tokenizer.hasMoreTokens())
+    const char * prefixName;
+    while ((token = tokenizerInterfaces.nextToken())!=NULL)
+    {
+    	if ((prefixName= strstr (token,"prefix"))!=NULL)
+    	{
+    		const char *leftparenp = strchr(prefixName,'(');
+    		const char *rightparenp = strchr(prefixName,')');
+    		std::string interfacePrefix;
+    		interfacePrefix.assign(leftparenp+1, rightparenp-leftparenp-1);
+    		for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+    		{
+        	   	 ie = inet_ift->getInterface(i);
+        	   	 name = ie->getName();
+        	   	 if ((strstr (name,interfacePrefix.c_str() )!=NULL) && !isThisInterfaceRegistered(ie))
+        	   	 {
+   	    			i_face = ie;
+   	    			InterfaceIdentification interface;
+   	    			interface.interfacePtr = ie;
+   	    			interface.index = i;
+   	    			num_80211++;
+   	    			interfaceVector.push_back(interface);
+        	   	 }
+       	    }
+		}
+    	else
+    	{
+    		for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+    		{
+    			ie = inet_ift->getInterface(i);
+    			name = ie->getName();
+    			if (strcmp (name,token)==0 && !isThisInterfaceRegistered(ie))
+    			{
+           			i_face = ie;
+    				InterfaceIdentification interface;
+    				interface.interfacePtr = ie;
+    				interface.index = i;
+    				num_80211++;
+    				interfaceVector.push_back(interface);
+    			}
+    		}
+    	}
+    }
+    const char *exclInterfaces = par("ExcludedInterfaces");
+    cStringTokenizer tokenizerExcluded(exclInterfaces);
+	if (tokenizerExcluded.hasMoreTokens())
 	{
-		while ((token = tokenizer.nextToken())!=NULL)
+		while ((token = tokenizerExcluded.nextToken())!=NULL)
 		{
 			for (unsigned int i = 0;i<interfaceVector.size();i++)
 			{
@@ -133,17 +182,10 @@ void ManetRoutingBase::registerRoutingModule()
 
 	if (interfaceVector.size()==0 || interfaceVector.size() > (unsigned int)maxInterfaces)
 		opp_error ("Manet routing protocol has found %i wlan interfaces",num_80211);
-
-	const char *classname = getParentModule()->getClassName();
-	mac_layer_=false;
-	if (strcmp(classname,"Ieee80211Mesh")==0)
-	{
+	if (mac_layer_)
 		hostAddress = interfaceVector[0].interfacePtr->getMacAddress();
-		mac_layer_=true;
-	}
 	else
 		hostAddress = interfaceVector[0].interfacePtr->ipv4Data()->getIPAddress();
-
 	// One enabled network interface (in total)
 }
 
@@ -170,6 +212,8 @@ ManetRoutingBase::~ManetRoutingBase(){
 
 bool ManetRoutingBase::isIpLocalAddress (const IPAddress& dest) const
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	return inet_rt->isLocalAddress(dest);
 }
 
@@ -177,6 +221,8 @@ bool ManetRoutingBase::isIpLocalAddress (const IPAddress& dest) const
 
 bool ManetRoutingBase::isLocalAddress (const Uint128& dest) const
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	if (!mac_layer_)
 		return inet_rt->isLocalAddress(dest.getIPAddress());
 	InterfaceEntry *   ie;
@@ -191,21 +237,29 @@ bool ManetRoutingBase::isLocalAddress (const Uint128& dest) const
 
 void ManetRoutingBase::linkLayerFeeback()
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	nb->subscribe(this, NF_LINK_BREAK);
 }
 
 void ManetRoutingBase::linkPromiscuous()
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	nb->subscribe(this, NF_LINK_PROMISCUOUS);
 }
 
 void ManetRoutingBase::linkFullPromiscuous()
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	nb->subscribe(this, NF_LINK_FULL_PROMISCUOUS);
 }
 
 void ManetRoutingBase::registerPosition()
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	regPosition = true;
 	nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
 }
@@ -221,6 +275,9 @@ void ManetRoutingBase::processFullPromiscuous (const cPolymorphic *details){retu
 
 void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destAddr, int destPort,int ttl,double delay,const Uint128 &iface)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	InterfaceEntry  *ie = NULL;
 	if (mac_layer_)
 	{
@@ -358,6 +415,9 @@ void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destA
 
 void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destAddr, int destPort,int ttl,double delay,int index)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	InterfaceEntry  *ie = NULL;
 	if (mac_layer_)
 	{
@@ -517,6 +577,9 @@ bool ManetRoutingBase::omnet_exist_rte (struct in_addr dst)
 
 void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, const Uint128 &netm,short int hops,bool del_entry,const Uint128 &iface)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	/* Add route to kernel routing table ... */
 	IPAddress desAddress((uint32_t)dst);
 	IPRoute *entry=NULL;
@@ -552,8 +615,10 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
 
 	IPAddress netmask((uint32_t)netm);
 	IPAddress gateway((uint32_t)gtwy);
+
+	// The default mask is for manet routing is  IPAddress::ALLONES_ADDRESS
 	if (netm==0)
-		netmask = IPAddress((uint32_t)dst).getNetworkMask().getInt();
+		netmask = IPAddress::ALLONES_ADDRESS; // IPAddress((uint32_t)dst).getNetworkMask().getInt();
 
 	/// Destination
 	entry->setHost(desAddress);
@@ -574,7 +639,10 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
 		entry->setType (IPRoute::REMOTE);
 	/// Source of route, MANUAL by reading a file,
 	/// routing protocol name otherwise
-	entry->setSource(IPRoute::MANET);
+	if (usetManetLabelRouting)
+		entry->setSource(IPRoute::MANET);
+	else
+		entry->setSource(IPRoute::MANET2);
 
 	if (!found)
 		inet_rt->addRoute(entry);
@@ -590,6 +658,9 @@ void ManetRoutingBase::omnet_chg_rte (const struct in_addr &dst, const struct in
 
 void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, const Uint128 &netm,short int hops,bool del_entry,int index)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	/* Add route to kernel routing table ... */
 	IPAddress desAddress((uint32_t)dst);
 	IPRoute *entry=NULL;
@@ -626,7 +697,7 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
 	IPAddress netmask((uint32_t)netm);
 	IPAddress gateway((uint32_t)gtwy);
 	if (netm==0)
-		netmask = IPAddress((uint32_t)dst).getNetworkMask().getInt();
+		netmask = IPAddress::ALLONES_ADDRESS; // IPAddress((uint32_t)dst).getNetworkMask().getInt();
 
 	/// Destination
 	entry->setHost(desAddress);
@@ -647,7 +718,12 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
 		entry->setType (IPRoute::REMOTE);
 	/// Source of route, MANUAL by reading a file,
 	/// routing protocol name otherwise
-	entry->setSource(IPRoute::MANET);
+
+	if (usetManetLabelRouting)
+		entry->setSource(IPRoute::MANET);
+	else
+		entry->setSource(IPRoute::MANET2);
+
 
 	if (!found)
 		inet_rt->addRoute(entry);
@@ -660,6 +736,9 @@ void ManetRoutingBase::omnet_chg_rte (const Uint128 &dst, const Uint128 &gtwy, c
 //
 Uint128 ManetRoutingBase::omnet_exist_rte (Uint128 dst)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	/* Add route to kernel routing table ... */
 	IPAddress desAddress((uint32_t)dst);
 	const IPRoute *e=NULL;
@@ -675,10 +754,13 @@ Uint128 ManetRoutingBase::omnet_exist_rte (Uint128 dst)
 }
 
 //
-// Erase all the enties int Ip4 the routing table
+// Erase all the entries in the routing table
 //
 void ManetRoutingBase::omnet_clean_rte ()
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	const IPRoute *entry;
 	if (mac_layer_)
 		return;
@@ -699,6 +781,8 @@ void ManetRoutingBase::omnet_clean_rte ()
 void ManetRoutingBase::receiveChangeNotification(int category, const cPolymorphic *details)
 {
 	Enter_Method("Manet llf");
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
 	if (category == NF_LINK_BREAK)
 	{
 		if (details==NULL)
@@ -766,6 +850,9 @@ int ManetRoutingBase::gettimeofday(struct timeval *tv, struct timezone *tz)
 //
 int ManetRoutingBase::getWlanInterfaceIndexByAddress (Uint128 add)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	if (add==(Uint128)0)
 		return interfaceVector[0].index;
 
@@ -790,6 +877,9 @@ int ManetRoutingBase::getWlanInterfaceIndexByAddress (Uint128 add)
 //
 InterfaceEntry * ManetRoutingBase::getInterfaceWlanByAddress(Uint128 add) const
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	if (add==(Uint128)0)
 		return interfaceVector[0].interfacePtr;
 
@@ -813,6 +903,9 @@ InterfaceEntry * ManetRoutingBase::getInterfaceWlanByAddress(Uint128 add) const
 // Get the index used in the general interface table
 //
 int ManetRoutingBase::getWlanInterfaceIndex (int i) const {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	if (i >= 0 && i <  (int) interfaceVector.size())
 		return interfaceVector[i].index;
 	else
@@ -824,6 +917,9 @@ int ManetRoutingBase::getWlanInterfaceIndex (int i) const {
 //
 InterfaceEntry * ManetRoutingBase::getWlanInterfaceEntry (int i) const
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	if (i >= 0 && i < (int)interfaceVector.size())
 		return interfaceVector[i].interfacePtr;
 	else
@@ -922,6 +1018,9 @@ double ManetRoutingBase::getSpeed()
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextHop,const int &ifaceIndex,const int &hops,const Uint128 &mask)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	/* Add route to kernel routing table ... */
 	IPAddress desAddress((uint32_t)destination);
 	IPRoute *entry=NULL;
@@ -975,7 +1074,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextH
 	entry->setMetric(hops);
 	/// Interface name and pointer
 
-	entry->setInterface(getWlanInterfaceEntry(ifaceIndex));
+	entry->setInterface(getInterfaceEntry(ifaceIndex));
 
 	/// Route type: Direct or Remote
 	if(entry->getGateway().isUnspecified())
@@ -994,6 +1093,9 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextH
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextHop,const char *ifaceName,const int &hops,const Uint128 &mask)
 {
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+
 	/* Add route to kernel routing table ... */
 	int index;
 	for (index = 0; index <getNumInterfaces(); index++)

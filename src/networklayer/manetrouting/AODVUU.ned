@@ -1,8 +1,9 @@
 package inet.networklayer.manetrouting;
-
-simple AODVUU
+import inet.networklayer.manetrouting.BaseRouting;
+simple AODVUU extends BaseRouting
 {
     parameters:
+        @class(AODVUU);
         bool log_to_file = default(false);
         bool hello_jittering = default(true);
         bool optimized_hellos = default(true);
@@ -23,7 +24,6 @@ simple AODVUU
         volatile double uniCastDelay @unit("s") = default (0s);
         bool EqualDelay =default(true);
         bool UseIndex=default(false);// use the interface index instead the ip to identify the interface
-        string ExcludedInterfaces = default(""); // list of interfaces excluded by the manet routing protocol
     gates:
         input from_ip;
         output to_ip;

@@ -1,10 +1,11 @@
 package inet.networklayer.manetrouting;
+import inet.networklayer.manetrouting.BaseRouting;
 
 
-
-simple DYMOUM
+simple DYMOUM extends BaseRouting
 {
     parameters:
+        @class(DYMOUM);
         bool no_path_acc_= default(false);
         bool reissue_rreq_= default(false);
         bool s_bit_= default(false);
@@ -24,7 +25,6 @@ simple DYMOUM
         volatile double uniCastDelay @unit("s") = default (0s);
         bool EqualDelay =default(true);
         bool UseIndex=default(false);// use the interface index instead the ip to identify the interface
-        string ExcludedInterfaces = default(""); // list of interfaces excluded by the manet routing protocol
     gates:
         input from_ip;
         output to_ip;

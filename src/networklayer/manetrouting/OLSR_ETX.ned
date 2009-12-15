@@ -1,6 +1,6 @@
 package inet.networklayer.manetrouting;
-
-simple OLSR_ETX
+import inet.networklayer.manetrouting.BaseRouting;
+simple OLSR_ETX extends BaseRouting
 {
     parameters:
         int Willingness = default(3); //ms
@@ -16,8 +16,7 @@ simple OLSR_ETX
         bool Link_delay = default(true);
         double C_alpha = default(0.2);
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface EXPERIMENTAL
-        string ExcludedInterfaces = default(""); // list of interfaces excluded by the manet routing protocol        
-
+        bool reduceFuncionality = default (false);
     gates:
         input from_ip;
         output to_ip;
