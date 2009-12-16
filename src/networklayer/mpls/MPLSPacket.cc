@@ -32,6 +32,7 @@ MPLSPacket::MPLSPacket(const MPLSPacket & p)
 MPLSPacket & MPLSPacket::operator=(const MPLSPacket & p)
 {
     cPacket::operator=(p);
+    this->labels=p.labels;
     return *this;
 }
 

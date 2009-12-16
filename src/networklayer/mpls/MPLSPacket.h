@@ -20,14 +20,33 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
+class MPLSStack
+{
+  public:
+    MPLSStack() {labels.clear();}
+    ~MPLSStack() {labels.clear();}
+	void push(int i) {labels.insert(labels.begin(),i);}
+	void pop() {labels.erase(labels.begin());}
+	int & top() {return labels.front();}
+	int size() const {return labels.size();}
+ 	bool empty() const {return labels.empty();}
+	MPLSStack& operator=(const MPLSStack& other) {this->labels = other.labels; return *this;}
+  private:
+	  typedef std::vector<int> LabelStack;
+	  LabelStack labels;
+};
+
+
+
 /**
  * Represents a packet with MPLS headers
  */
 class INET_API MPLSPacket: public cPacket
 {
   protected:
-    typedef std::stack<int> LabelStack;
-    LabelStack labels;
+    //typedef std::stack<int> LabelStack;
+    // LabelStack labels;
+    MPLSStack labels;
 
   public:
     /* constructors*/
