@@ -36,15 +36,15 @@ class INET_API MPLSPacket: public cPacket
 	 public:
 	    MPLSStack() {labels.clear();}
 	    ~MPLSStack() {labels.clear();}
-		void push(int i) {labels.insert(labels.begin(),i);}
-		void pop() {labels.erase(labels.begin());}
-		int & top() {return labels.front();}
+		void push(int i) {labels.push_back(i);}
+		void pop() {labels.pop_back();}
+		int & top() {return labels.back();}
 		unsigned int size() const {return labels.size();}
 	 	bool empty() const {return labels.empty();}
 		MPLSStack& operator=(const MPLSStack& other) {this->labels = other.labels; return *this;}
 
-		int  getValue(const unsigned int &i) const {return this->labels[i];}
-		void setValue(const unsigned int &i, int val) {this->labels[i]=val;}
+		int  getValue(const unsigned int &i) const {return this->labels[labels.size()-1-i];}
+		void setValue(const unsigned int &i, int val) {this->labels[labels.size()-1-i]=val;}
 	};
 
 
@@ -90,6 +90,7 @@ class INET_API MPLSPacket: public cPacket
      * Returns the top label
      */
     inline int getTopLabel()  {return labels.top();}
+    inline int getNumLabel()  {return labels.size();}
     virtual std::string detailedInfo() const;
 };
 
