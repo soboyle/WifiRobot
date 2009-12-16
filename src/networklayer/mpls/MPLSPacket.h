@@ -20,29 +20,34 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
-class MPLSStack
-{
-  public:
-    MPLSStack() {labels.clear();}
-    ~MPLSStack() {labels.clear();}
-	void push(int i) {labels.insert(labels.begin(),i);}
-	void pop() {labels.erase(labels.begin());}
-	int & top() {return labels.front();}
-	int size() const {return labels.size();}
- 	bool empty() const {return labels.empty();}
-	MPLSStack& operator=(const MPLSStack& other) {this->labels = other.labels; return *this;}
-  private:
-	  typedef std::vector<int> LabelStack;
-	  LabelStack labels;
-};
-
-
 
 /**
  * Represents a packet with MPLS headers
  */
 class INET_API MPLSPacket: public cPacket
 {
+
+  protected:
+	class MPLSStack
+	{
+	 protected:
+		typedef std::vector<int> LabelStack;
+		LabelStack labels;
+	 public:
+	    MPLSStack() {labels.clear();}
+	    ~MPLSStack() {labels.clear();}
+		void push(int i) {labels.insert(labels.begin(),i);}
+		void pop() {labels.erase(labels.begin());}
+		int & top() {return labels.front();}
+		unsigned int size() const {return labels.size();}
+	 	bool empty() const {return labels.empty();}
+		MPLSStack& operator=(const MPLSStack& other) {this->labels = other.labels; return *this;}
+
+		int  getValue(const unsigned int &i) const {return this->labels[i];}
+		void setValue(const unsigned int &i, int val) {this->labels[i]=val;}
+	};
+
+
   protected:
     //typedef std::stack<int> LabelStack;
     // LabelStack labels;
@@ -85,6 +90,7 @@ class INET_API MPLSPacket: public cPacket
      * Returns the top label
      */
     inline int getTopLabel()  {return labels.top();}
+    virtual std::string detailedInfo() const;
 };
 
 #endif

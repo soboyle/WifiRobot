@@ -36,4 +36,16 @@ MPLSPacket & MPLSPacket::operator=(const MPLSPacket & p)
     return *this;
 }
 
+std::string MPLSPacket::detailedInfo() const
+{
+	std::stringstream out;
+
+	for (unsigned int i=0;i<labels.size();i++)
+	{
+		out << labels.getValue(i) << " ";
+	}
+
+  	return out.str();
+}
+
 
