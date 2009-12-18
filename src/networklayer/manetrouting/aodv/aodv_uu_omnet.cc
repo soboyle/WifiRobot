@@ -998,16 +998,36 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 	bool status=true;
 	bool delEntry = (add == (Uint128)0);
 
+	DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
+
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
 
 	if (fwd_rt!=NULL)
-		rt_table_delete(fwd_rt);
+	{
+		list_detach(&fwd_rt->l);
+	    precursor_list_destroy(fwd_rt);
+	    if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)
+	    	rt_tbl.num_active--;
+	    timer_remove(&fwd_rt->rt_timer);
+	    timer_remove(&fwd_rt->hello_timer);
+	    timer_remove(&fwd_rt->ack_timer);
+	    rt_tbl.num_entries--;
+	    free (fwd_rt);
+	}
+	else
+		DEBUG(LOG_DEBUG, 0, "No route entry to delete");
 
 	if (ifaceIndex>=getNumInterfaces())
 		status = false;
-	if (!delEntry && ifaceIndex<getNumInterfaces())
-		status = (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, ifaceIndex)!=NULL);
 	ManetRoutingBase::setRoute(dest,add,ifaceIndex,hops,mask);
+
+	if (!delEntry && ifaceIndex<getNumInterfaces())
+	{
+		fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, ifaceIndex);
+		status = (fwd_rt!=NULL);
+
+	}
+
 	return status;
 }
 
@@ -1021,10 +1041,24 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 	int index;
 	bool delEntry = (add == (Uint128)0);
 
+	DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
 
 	if (fwd_rt!=NULL)
-		rt_table_delete(fwd_rt);
+	{
+		list_detach(&fwd_rt->l);
+	    precursor_list_destroy(fwd_rt);
+	    if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)
+	    	rt_tbl.num_active--;
+	    timer_remove(&fwd_rt->rt_timer);
+	    timer_remove(&fwd_rt->hello_timer);
+	    timer_remove(&fwd_rt->ack_timer);
+	    rt_tbl.num_entries--;
+	    free (fwd_rt);
+	}
+	else
+		DEBUG(LOG_DEBUG, 0, "No route entry to delete");
+
 	for (index = 0; index <getNumInterfaces(); index++)
 	{
 		if (strcmp(ifaceName, getInterfaceEntry(index)->getName())==0) break;
@@ -1032,9 +1066,17 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 	if (index>=getNumInterfaces())
 		status = false;
 
-	if (!delEntry && index<getNumInterfaces())
-		status = (rt_table_insert(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, index)!=NULL);
-
 	ManetRoutingBase::setRoute(dest,add,index,hops,mask);
+
+	if (!delEntry && index<getNumInterfaces())
+	{
+		fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,0xFFFF,0,IMMORTAL,0, index);
+		status = (fwd_rt!=NULL);
+	}
+
+
 	return status;
 }
+
+
+

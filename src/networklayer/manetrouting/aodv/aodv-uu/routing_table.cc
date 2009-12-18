@@ -710,3 +710,105 @@ void precursor_list_destroy(rt_table_t * rt)
 	}
 }
 
+#ifdef OMNETPP
+rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
+				     struct in_addr next,
+				     u_int8_t hops, u_int32_t seqno,
+				     u_int32_t life, u_int8_t state,
+				     u_int16_t flags, unsigned int ifindex)
+{
+	hash_value hash;
+	unsigned int index;
+	list_t *pos;
+	rt_table_t *rt;
+	struct in_addr nm;
+	struct in_addr dest;
+	nm.s_addr = 0;
+
+
+	/* Calculate hash key */
+	dest.s_addr=dest_addr.s_addr;
+	index = hashing(&dest, &hash);
+
+	DEBUG(LOG_INFO, 0, "modifyAODVTables");
+    /* Check if we already have an entry for dest_addr */
+	list_foreach(pos, &rt_tbl.tbl[index]) {
+		rt = (rt_table_t *) pos;
+		if (memcmp(&rt->dest_addr, &dest, sizeof(struct in_addr)) == 0) {
+	    	DEBUG(LOG_INFO, 0, "%s already exist in routing table!",
+			  ip_to_str(dest_addr));
+		    return NULL;
+		}
+    	}
+
+	if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == NULL) {
+		fprintf(stderr, "Malloc failed!\n");
+		exit(-1);
+    	}
+	memset(rt, 0, sizeof(rt_table_t));
+	rt->dest_addr = dest_addr;
+	rt->next_hop = next;
+	rt->dest_seqno = seqno;
+	rt->flags = flags;
+	rt->hcnt = hops;
+	rt->ifindex = ifindex;
+	rt->hash = hash;
+	rt->state = state;
+	timer_init(&rt->rt_timer, &NS_CLASS route_expire_timeout, rt);
+	timer_init(&rt->ack_timer, &NS_CLASS rrep_ack_timeout, rt);
+	timer_init(&rt->hello_timer, &NS_CLASS hello_timeout, rt);
+	rt->last_hello_time.tv_sec = 0;
+	rt->last_hello_time.tv_usec = 0;
+	rt->hello_cnt = 0;
+	rt->nprec = 0;
+	INIT_LIST_HEAD(&rt->precursors);
+    /* Insert first in bucket... */
+	rt_tbl.num_entries++;
+	DEBUG(LOG_INFO, 0, "Inserting %s (bucket %d) next hop %s",
+		ip_to_str(dest_addr), index, ip_to_str(next));
+
+	list_add(&rt_tbl.tbl[index], &rt->l);
+
+	if (state == INVALID) {
+
+		if (flags & RT_REPAIR) {
+			rt->rt_timer.handler = &NS_CLASS local_repair_timeout;
+			life = ACTIVE_ROUTE_TIMEOUT;
+		} else {
+			rt->rt_timer.handler = &NS_CLASS route_delete_timeout;
+			life = DELETE_PERIOD;
+		}
+	} else {
+		rt_tbl.num_active++;
+	}
+#ifdef CONFIG_GATEWAY_DISABLE
+	if (rt->flags & RT_GATEWAY)
+		rt_table_update_inet_rt(rt, life);
+#endif
+
+//#ifdef NS_PORT
+	DEBUG(LOG_INFO, 0, "New timer for %s, life=%d",
+		ip_to_str(rt->dest_addr), life);
+
+	if (life != 0)
+		timer_set_timeout(&rt->rt_timer, life);
+//#endif
+    /* In case there are buffered packets for this destination, we
+     * send them on the new route. */
+	if ((rt->state == VALID || rt->state == IMMORTAL)  && seek_list_remove(seek_list_find(dest_addr))) {
+#ifdef NS_PORT
+		if (rt->flags & RT_INET_DEST)
+	 		packet_queue_set_verdict(dest_addr, PQ_ENC_SEND);
+		else
+	    	packet_queue_set_verdict(dest_addr, PQ_SEND);
+#endif
+	}
+ 	if ( state == IMMORTAL)
+ 	{
+ 		timer_remove(&rt->rt_timer);
+ 		timer_remove(&rt->ack_timer);
+ 		timer_remove(&rt->hello_timer);
+ 	}
+	return rt;
+}
+#endif

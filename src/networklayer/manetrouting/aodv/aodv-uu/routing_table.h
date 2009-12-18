@@ -117,6 +117,14 @@ void rt_table_delete(rt_table_t * rt);
 void precursor_add(rt_table_t * rt, struct in_addr addr);
 void precursor_remove(rt_table_t * rt, struct in_addr addr);
 
+#ifdef OMNETPP
+rt_table_t * modifyAODVTables(struct in_addr,
+				     struct in_addr next,
+				     u_int8_t hops, u_int32_t seqno,
+				     u_int32_t life, u_int8_t state,
+				     u_int16_t flags, unsigned int ifindex);
+#endif
+
 #endif				/* NS_NO_DECLARATIONS */
 
 #endif				/* ROUTING_TABLE_H */
