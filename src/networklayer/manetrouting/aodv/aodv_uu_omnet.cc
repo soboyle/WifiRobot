@@ -993,6 +993,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 {
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
+	struct in_addr rerr_dest;
 	destAddr.s_addr = dest;
 	nextAddr.s_addr = add;
 	bool status=true;
@@ -1002,8 +1003,21 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
 
-	if (fwd_rt!=NULL)
+	if (fwd_rt)
 	{
+		if (delEntry)
+		{
+			RERR* rerr = rerr_create(0, destAddr, 0);
+			DEBUG(LOG_DEBUG, 0, "Sending RERR to prev hop %s for unknown dest %s",
+					ip_to_str(src_addr), ip_to_str(dest_addr));
+
+    /* Unicast the RERR to the source of the data transmission
+     * if possible, otherwise we broadcast it. */
+			rerr_dest.s_addr = AODV_BROADCAST;
+
+			aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
+					1, &DEV_IFINDEX(NS_IFINDEX));
+		}
 		list_detach(&fwd_rt->l);
 	    precursor_list_destroy(fwd_rt);
 	    if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)
@@ -1035,6 +1049,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 {
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
+	struct in_addr rerr_dest;
 	destAddr.s_addr = dest;
 	nextAddr.s_addr = add;
 	bool status=true;
@@ -1044,8 +1059,21 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 	DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
 	rt_table_t * fwd_rt = rt_table_find(destAddr);
 
-	if (fwd_rt!=NULL)
+	if (fwd_rt)
 	{
+		if (delEntry)
+		{
+			RERR* rerr = rerr_create(0, destAddr, 0);
+			DEBUG(LOG_DEBUG, 0, "Sending RERR to prev hop %s for unknown dest %s",
+					ip_to_str(src_addr), ip_to_str(dest_addr));
+
+    /* Unicast the RERR to the source of the data transmission
+     * if possible, otherwise we broadcast it. */
+			rerr_dest.s_addr = AODV_BROADCAST;
+
+			aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
+					1, &DEV_IFINDEX(NS_IFINDEX));
+		}
 		list_detach(&fwd_rt->l);
 	    precursor_list_destroy(fwd_rt);
 	    if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)
