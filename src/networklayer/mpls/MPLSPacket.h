@@ -28,31 +28,8 @@ class INET_API MPLSPacket: public cPacket
 {
 
   protected:
-	class MPLSStack
-	{
-	 protected:
-		typedef std::vector<int> LabelStack;
-		LabelStack labels;
-	 public:
-	    MPLSStack() {labels.clear();}
-	    ~MPLSStack() {labels.clear();}
-		void push(int i) {labels.push_back(i);}
-		void pop() {labels.pop_back();}
-		int & top() {return labels.back();}
-		unsigned int size() const {return labels.size();}
-	 	bool empty() const {return labels.empty();}
-		MPLSStack& operator=(const MPLSStack& other) {this->labels = other.labels; return *this;}
-
-		int  getValue(const unsigned int &i) const {return this->labels[labels.size()-1-i];}
-		void setValue(const unsigned int &i, int val) {this->labels[labels.size()-1-i]=val;}
-	};
-
-
-  protected:
-    //typedef std::stack<int> LabelStack;
-    // LabelStack labels;
-    MPLSStack labels;
-
+    typedef std::vector<int> LabelStack;
+    LabelStack labels;
   public:
     /* constructors*/
     MPLSPacket(const char *name=NULL);
@@ -66,20 +43,25 @@ class INET_API MPLSPacket: public cPacket
      */
     virtual MPLSPacket *dup() const {return new MPLSPacket(*this);}
 
+    /*
+     * Returns a string with the labels, starting with the top of stack.
+     */
+    virtual std::string info() const;
+
     /**
      * Swap Label operation
      */
-    inline void swapLabel(int newLabel)  {labels.top()=newLabel;}
+    inline void swapLabel(int newLabel)  {labels.back()=newLabel;}
 
     /**
      * Pushes new label on the label stack
      */
-    inline void pushLabel(int newLabel)  {labels.push(newLabel);addBitLength(32);}
+    inline void pushLabel(int newLabel)  {labels.push_back(newLabel);addBitLength(32);}
 
     /**
      * Pops the top label
      */
-    inline void popLabel()  {labels.pop();addBitLength(-32);}
+    inline void popLabel()  {labels.pop_back();addBitLength(-32);}
 
     /**
      * Returns true if the label stack is not empty
@@ -89,9 +71,8 @@ class INET_API MPLSPacket: public cPacket
     /**
      * Returns the top label
      */
-    inline int getTopLabel()  {return labels.top();}
+    inline int getTopLabel()  {return labels.back();}
     inline int getNumLabel()  {return labels.size();}
-    virtual std::string detailedInfo() const;
 };
 
 #endif
