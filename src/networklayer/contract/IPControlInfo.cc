@@ -21,7 +21,10 @@
 IPControlInfo::~IPControlInfo()
 {
 	if (dgram)
-		delete dgram;  //FIXME this crashes on program exit all too often!
+	{
+		drop(dgram);
+		delete dgram;
+    }
 }
 
 void IPControlInfo::setOrigDatagram(IPDatagram *d)
@@ -29,6 +32,7 @@ void IPControlInfo::setOrigDatagram(IPDatagram *d)
     if (dgram)
         opp_error("IPControlInfo::setOrigDatagram(): a datagram is already attached");
     dgram = d;
+    take(dgram);
 }
 
 IPDatagram *IPControlInfo::removeOrigDatagram()
@@ -38,6 +42,7 @@ IPDatagram *IPControlInfo::removeOrigDatagram()
                   "(already removed, or maybe this IPControlInfo does not come "
                   "from the IP module?)");
     IPDatagram *ret = dgram;
+    drop(dgram);
     dgram = NULL;
     return ret;
 }
