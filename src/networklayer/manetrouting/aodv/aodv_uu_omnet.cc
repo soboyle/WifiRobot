@@ -991,6 +991,7 @@ bool NS_CLASS getDestAddress(cPacket *msg,Uint128 &dest)
 
 bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &ifaceIndex,const int &hops,const Uint128 &mask)
 {
+	Enter_Method_Silent();
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
 	struct in_addr rerr_dest;
@@ -1047,6 +1048,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 
 bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifaceName,const int &hops,const Uint128 &mask)
 {
+	Enter_Method_Silent();
 	struct in_addr destAddr;
 	struct in_addr nextAddr;
 	struct in_addr rerr_dest;
