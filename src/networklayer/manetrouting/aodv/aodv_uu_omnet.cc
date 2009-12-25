@@ -1039,7 +1039,6 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 	if (!delEntry && ifaceIndex<getNumInterfaces())
 	{
 		fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,(uint32_t) SIMTIME_DBL(simTime()), 0xFFFF,IMMORTAL,0, ifaceIndex);
-		fwd_rt->dest_seqno =
 		status = (fwd_rt!=NULL);
 
 	}
