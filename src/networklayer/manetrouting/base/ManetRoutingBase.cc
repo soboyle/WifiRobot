@@ -359,7 +359,6 @@ void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destA
 		EV << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
 			add.str() << " to " << add.str() << "\n";
 		IPControlInfo *ipControlInfo = new IPControlInfo();
-		ipControlInfo->setOrigDatagram(NULL);
 		ipControlInfo->setDestAddr(add);
 		//ipControlInfo->setProtocol(IP_PROT_UDP);
 		ipControlInfo->setProtocol(IP_PROT_MANET);
@@ -379,7 +378,8 @@ void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destA
 				srcadd = ie->ipv4Data()->getIPAddress();
 // It's necessary to duplicate the the control info message and include the information relative to the interface
 				IPControlInfo *ipControlInfoAux = new IPControlInfo(*ipControlInfo);
-				ipControlInfoAux->setOrigDatagram(NULL);
+				if (ipControlInfoAux->getOrigDatagram())
+					delete ipControlInfoAux->removeOrigDatagram();
 				ipControlInfoAux->setInterfaceId(ie->getInterfaceId());
 				ipControlInfoAux->setSrcAddr(srcadd);
 				UDPPacket *udpPacketAux = udpPacket->dup();
@@ -499,7 +499,6 @@ void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destA
 		EV << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
 			add.str() << " to " << add.str() << "\n";
 		IPControlInfo *ipControlInfo = new IPControlInfo();
-		ipControlInfo->setOrigDatagram(NULL);
 		ipControlInfo->setDestAddr(add);
 		//ipControlInfo->setProtocol(IP_PROT_UDP);
 		ipControlInfo->setProtocol(IP_PROT_MANET);
@@ -519,7 +518,8 @@ void ManetRoutingBase::sendToIp (cPacket *msg, int srcPort, const Uint128& destA
 				srcadd = ie->ipv4Data()->getIPAddress();
 // It's necessary to duplicate the the control info message and include the information relative to the interface
 				IPControlInfo *ipControlInfoAux = new IPControlInfo(*ipControlInfo);
-				ipControlInfoAux->setOrigDatagram(NULL);
+				if (ipControlInfoAux->getOrigDatagram())
+					delete ipControlInfoAux->removeOrigDatagram();
 				ipControlInfoAux->setInterfaceId(ie->getInterfaceId());
 				ipControlInfoAux->setSrcAddr(srcadd);
 				UDPPacket *udpPacketAux = udpPacket->dup();
