@@ -254,6 +254,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 		virtual double getXPos();
 		virtual double getYPos();
 		virtual double getSpeed();
+		virtual double getDirection();
 
 	public:
 // Routing information access

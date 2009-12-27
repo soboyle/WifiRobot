@@ -1015,6 +1015,16 @@ double ManetRoutingBase::getSpeed()
 	return distance/time;
 }
 
+double ManetRoutingBase::getDirection()
+{
+	if (regPosition)
+		error("this node doesn't have activated the register position");
+	double x =  xPosition-xPositionPrev;
+	double y =  yPosition-yPositionPrev;
+	double angle = atan(y/x);
+	return angle;
+}
+
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination,const Uint128 &nextHop,const int &ifaceIndex,const int &hops,const Uint128 &mask)
 {
