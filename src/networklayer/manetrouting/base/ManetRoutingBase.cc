@@ -199,9 +199,10 @@ ManetRoutingBase::~ManetRoutingBase(){
 	}
 	if (timerMultiMapPtr)
 	{
-		for  (TimerMultiMap::iterator it = timerMultiMapPtr->begin();it!=timerMultiMapPtr->end();it++)
+		while (timerMultiMapPtr->size()>0)
 		{
-			ManetTimer * timer = it->second;
+			ManetTimer * timer = timerMultiMapPtr->begin()->second;
+			timerMultiMapPtr->erase(timerMultiMapPtr->begin());
 			delete timer;
 		}
 		delete timerMultiMapPtr;

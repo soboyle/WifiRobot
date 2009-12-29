@@ -2281,10 +2281,16 @@ OLSR::~OLSR()
 	if (&mid_timer_!=NULL)
 		cancelAndDelete(&mid_timer_);
 */
-	cancelAndDelete(timerMessage);
-	for  (TimerQueue::iterator it = timerQueuePtr->begin();it!=timerQueuePtr->end();it++)
+	if (timerMessage)
 	{
-		OLSR_Timer * timer = it->second;
+		cancelAndDelete(timerMessage);
+		timerMessage=NULL;
+	}
+
+	while (timerQueuePtr && timerQueuePtr->size()>0)
+	{
+		OLSR_Timer * timer = timerQueuePtr->begin()->second;
+		timerQueuePtr->erase(timerQueuePtr->begin());
 		timer->setTuple(NULL);
 		if (helloTimer==timer)
 			helloTimer=NULL;
@@ -2296,14 +2302,26 @@ OLSR::~OLSR()
 	}
 
 	if (helloTimer)
+	{
 		delete helloTimer;
-	else if (tcTimer)
+		helloTimer=NULL;
+	}
+	if (tcTimer)
+	{
 		delete tcTimer;
-	else if (midTimer)
+		tcTimer=NULL;
+	}
+	if (midTimer)
+	{
 		delete midTimer;
+		midTimer=NULL;
+	}
 
-	timerQueuePtr->clear();
-	delete timerQueuePtr;
+	if (timerQueuePtr)
+	{
+		delete timerQueuePtr;
+		timerQueuePtr = NULL;
+	}
 }
 
 

@@ -2295,11 +2295,16 @@ OLSR_ETX::~OLSR_ETX()
 	if (&link_quality_timer_!=NULL)
 		cancelAndDelete(&link_quality_timer_);
 	*/
-	cancelAndDelete(timerMessage);
-	//int size = timerQueuePtr->size();
-	for  (TimerQueue::iterator it = timerQueuePtr->begin();it!=timerQueuePtr->end();it++)
+	if (timerMessage)
 	{
-		OLSR_Timer * timer = it->second;
+		cancelAndDelete(timerMessage);
+		timerMessage=NULL;
+	}
+
+	while (timerQueuePtr && timerQueuePtr->size()>0)
+	{
+		OLSR_Timer * timer = timerQueuePtr->begin()->second;
+		timerQueuePtr->erase(timerQueuePtr->begin());
 		timer->setTuple(NULL);
 		if (helloTimer==timer)
 			helloTimer=NULL;
@@ -2311,9 +2316,32 @@ OLSR_ETX::~OLSR_ETX()
 			linkQualityTimer=NULL;
 		delete timer;
 	}
-	timerQueuePtr->clear();
-	delete timerQueuePtr;
 
+	if (helloTimer)
+	{
+		delete helloTimer;
+		helloTimer=NULL;
+	}
+	if (tcTimer)
+	{
+		delete tcTimer;
+		tcTimer=NULL;
+	}
+	if (midTimer)
+	{
+		delete midTimer;
+		midTimer=NULL;
+	}
+	if (linkQualityTimer)
+	{
+		delete linkQualityTimer;
+		linkQualityTimer=NULL;
+	}
+	if (timerQueuePtr)
+	{
+		delete timerQueuePtr;
+		timerQueuePtr = NULL;
+	}
 }
 
 
