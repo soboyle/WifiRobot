@@ -7,8 +7,10 @@
 #include "Ieee80211Primitives_m.h"
 #include "Radio80211aControlInfo_m.h"
 
-class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase
-{
+// Notification class of Updated info in the associated AP
+#define NF_L2_ASSOCIATED_AP_UPDATE     100        // when the associated AP info is updated (currently Ieee80211)
+
+class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase {
   public:
     //
     // Encapsulates information about the ongoing scanning process
@@ -29,8 +31,8 @@ class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase
     //
     // Stores AP info received during scanning
     //
-    struct APInfo
-    {
+    class APInfo : public cPolymorphic {
+    public:
         int channel;
         MACAddress address; // alias bssid
         std::string ssid;
@@ -46,17 +48,42 @@ class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase
             channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
             isAuthenticated=false; authTimeoutMsg=NULL;
         }
+
+        APInfo(const APInfo& ap_info) {
+        	this->channel = ap_info.channel;
+        	this->address = ap_info.address;
+        	this->ssid = ap_info.ssid;
+        	this->supportedRates = ap_info.supportedRates;
+        	this->beaconInterval = ap_info.beaconInterval;
+        	this->rxPower = ap_info.rxPower;
+        	this->isAuthenticated = ap_info.isAuthenticated;
+        	this->authSeqExpected = ap_info.authSeqExpected;
+        	this->authTimeoutMsg = NULL;
+        }
     };
 
     //
     // Associated AP, plus data associated with the association with the associated AP
     //
-    struct AssociatedAPInfo : public APInfo
-    {
+    class AssociatedAPInfo : public APInfo {
+    public:
         int receiveSequence;
+        bool isAssociated;
         cMessage *beaconTimeoutMsg;
+        cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
 
-        AssociatedAPInfo() : APInfo() {receiveSequence=0; beaconTimeoutMsg=NULL;}
+        AssociatedAPInfo() : APInfo() {receiveSequence=0; isAssociated = false; beaconTimeoutMsg=NULL; assocTimeoutMsg=NULL;}
+        AssociatedAPInfo(const AssociatedAPInfo& assoc_ap) : APInfo(assoc_ap) {receiveSequence=0; beaconTimeoutMsg=NULL;}
+
+        friend std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTAExtended::AssociatedAPInfo& assocAP) {
+            os << "AP addr=" << assocAP.address
+               << " chan=" << assocAP.channel
+               << " ssid=" << assocAP.ssid
+               << " beaconIntvl=" << assocAP.beaconInterval
+               << " receiveSeq="  << assocAP.receiveSequence
+               << " rxPower=" << assocAP.rxPower;
+            return os;
+        }
     };
 
     // Connectivity states
@@ -69,8 +96,6 @@ class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase
 	cOutVector mgmtQueueLenVec;
 	cOutVector rcvdPowerVectormW;
 	cOutVector rcvdPowerVectordB;
-
-
 
   protected:
 	// Paula Uribe: add radio reference
@@ -91,13 +116,17 @@ class INET_API Ieee80211MgmtSTAExtended : public Ieee80211MgmtBase
     AccessPointList apList;
 
     // associated Access Point
-    bool isAssociated;
-    cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
+    bool isAssociated;         // is the mgmtModule is associated
     AssociatedAPInfo assocAP;
 
     double max_beacons_missed; // number of max beacon missed to notify the agent about beacon_lost event
 
   protected:
+
+	~Ieee80211MgmtSTAExtended() {
+
+	}
+
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 

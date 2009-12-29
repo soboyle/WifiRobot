@@ -54,17 +54,6 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTAExtended::APInf
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTAExtended::AssociatedAPInfo& assocAP)
-{
-    os << "AP addr=" << assocAP.address
-       << " chan=" << assocAP.channel
-       << " ssid=" << assocAP.ssid
-       << " beaconIntvl=" << assocAP.beaconInterval
-       << " receiveSeq="  << assocAP.receiveSequence
-       << " rxPower=" << assocAP.rxPower;
-    return os;
-}
-
 void Ieee80211MgmtSTAExtended::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
@@ -72,7 +61,6 @@ void Ieee80211MgmtSTAExtended::initialize(int stage)
     {
         isScanning = false;
         isAssociated = false;
-        assocTimeoutMsg = NULL;
 
         nb = NotificationBoardAccess().get();
 
@@ -90,7 +78,7 @@ void Ieee80211MgmtSTAExtended::initialize(int stage)
         WATCH(assocAP);
         WATCH_LIST(apList);
 
-        std::cout << "MAX_BEACON_MISSED for Station " << this->getFullName() << ": " << this->max_beacons_missed << endl;
+        EV << "MAX_BEACON_MISSED for Station " << this->getFullName() << ": " << this->max_beacons_missed << endl;
 
     	// connectivity initial state
 		connStates.setName("Connectivity States");
@@ -120,6 +108,7 @@ void Ieee80211MgmtSTAExtended::handleTimer(cMessage *msg)
         APInfo *ap = (APInfo *)msg->getContextPointer();
         EV << "Authentication timed out, AP address = " << ap->address << "\n";
 
+        ap->authTimeoutMsg = NULL;
         // send back failure report to agent
         sendAuthenticationConfirm(ap, PRC_TIMEOUT);
     }
@@ -154,13 +143,13 @@ void Ieee80211MgmtSTAExtended::handleTimer(cMessage *msg)
         delete msg;
         if (scanning.busyChannelDetected)
         {
-            EV << "******************* Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
+            EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
             cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
             scheduleAt(simTime()+scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
         }
         else
         {
-        	EV << "******************* Channel was empty during minChannelTime, going to next channel\n";
+        	EV << "Channel was empty during minChannelTime, going to next channel\n";
             bool done = scanNextChannel();
             if (done)
                 sendScanConfirm(); // send back response to agents' "scan" command
@@ -177,14 +166,13 @@ void Ieee80211MgmtSTAExtended::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtSTAExtended::handleUpperMessage(cPacket *msg)
-{
+void Ieee80211MgmtSTAExtended::handleUpperMessage(cPacket *msg) {
 	if (this->isAssociated) {
-		Ieee80211DataFrame *frame = encapsulate(msg);
+		Ieee80211DataFrame *frame = this->encapsulate(msg);
 		sendOrEnqueue(frame);
 	} else {
 		EV << "STA not associated, buffering the packet" << endl;
-		Ieee80211DataFrame *frame = encapsulate(msg);
+		Ieee80211DataFrame *frame = this->encapsulate(msg);
 		enqueue(frame);
 	}
 }
@@ -327,8 +315,6 @@ void Ieee80211MgmtSTAExtended::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
 
-    std::cout << "beacon lost max reached.. AP is considered lost." << std::endl;
-
 	nb->fireChangeNotification(NF_L2_BEACON_LOST, myEntry);  //XXX use InterfaceEntry as detail, etc...
 }
 
@@ -375,7 +361,7 @@ void Ieee80211MgmtSTAExtended::startAuthentication(APInfo *ap, simtime_t timeout
 
 void Ieee80211MgmtSTAExtended::startAssociation(APInfo *ap, simtime_t timeout)
 {
-    if (isAssociated || assocTimeoutMsg)
+    if (isAssociated || this->assocAP.assocTimeoutMsg)
         error("startAssociation: already associated or association currently in progress");
     if (!ap->isAuthenticated)
         error("startAssociation: not yet authenticated with AP address=", ap->address.str().c_str());
@@ -399,10 +385,10 @@ void Ieee80211MgmtSTAExtended::startAssociation(APInfo *ap, simtime_t timeout)
     sendManagementFrame(frame, ap->address);
 
     // schedule timeout
-    ASSERT(assocTimeoutMsg==NULL);
-    assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
-    assocTimeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime()+timeout, assocTimeoutMsg);
+    ASSERT(this->assocAP.assocTimeoutMsg==NULL);
+    this->assocAP.assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
+    this->assocAP.assocTimeoutMsg->setContextPointer(ap);
+    scheduleAt(simTime()+timeout, this->assocAP.assocTimeoutMsg);
 }
 
 void Ieee80211MgmtSTAExtended::receiveChangeNotification(int category, const cPolymorphic *details)
@@ -432,11 +418,11 @@ void Ieee80211MgmtSTAExtended::processScanCommand(Ieee80211Prim_ScanRequest *ctr
     {
         disassociate();
     }
-    else if (assocTimeoutMsg)
+    else if (this->assocAP.assocTimeoutMsg)
     {
         EV << "Canceling ongoing association process\n";
-        delete cancelEvent(assocTimeoutMsg);
-        assocTimeoutMsg = NULL;
+        delete cancelEvent(this->assocAP.assocTimeoutMsg);
+        this->assocAP.assocTimeoutMsg = NULL;
     }
 
     // log the state change
@@ -485,15 +471,10 @@ bool Ieee80211MgmtSTAExtended::scanNextChannel()
         return true; // we're done
     }
 
-    int currentCh = scanning.channelList[scanning.currentChannelIndex];
-	//std::cout << simTime() << " " << myAddress << " *** END SCANNING CHANNEL " << currentCh << endl;
-
     // tune to next channel
     int newChannel = scanning.channelList[++scanning.currentChannelIndex];
     changeChannel(newChannel);
     scanning.busyChannelDetected = false;
-
-    //std::cout << simTime() << " " << myAddress << "*** START SCANNING CHANNEL " << newChannel << endl;
 
     if (scanning.activeScan)
     {
@@ -605,22 +586,21 @@ void Ieee80211MgmtSTAExtended::processDisassociateCommand(Ieee80211Prim_Disassoc
     {
         disassociate();
     }
-    else if (assocTimeoutMsg)
+    else if (this->assocAP.assocTimeoutMsg)
     {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
-        assocTimeoutMsg = NULL;
+        delete cancelEvent(this->assocAP.assocTimeoutMsg);
+        this->assocAP.assocTimeoutMsg = NULL;
     }
 
     // create and send disassociation request
-    Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disass");
+    Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disassociation");
     frame->getBody().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
 }
 
 void Ieee80211MgmtSTAExtended::disassociate()
 {
-    std::cout << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(isAssociated);
     isAssociated = false;
     delete cancelEvent(assocAP.beaconTimeoutMsg);
@@ -656,7 +636,17 @@ int Ieee80211MgmtSTAExtended::statusCodeToPrimResultCode(int statusCode)
 
 void Ieee80211MgmtSTAExtended::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    sendUp(decapsulate(frame));
+	if (this->isAssociated) {
+		cPacket* payload = decapsulate(frame);
+		if (payload!=NULL) {
+			sendUp(payload);
+		} else {
+			EV << "decapsulation gives NULL. so discarding this frame" << endl;
+		}
+	} else {
+		EV << "STA not associated. discarding frame" << endl;
+		delete frame;
+	}
 }
 
 void Ieee80211MgmtSTAExtended::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
@@ -771,7 +761,7 @@ void Ieee80211MgmtSTAExtended::handleAssociationResponseFrame(Ieee80211Associati
 {
     EV << "Received Association Response frame\n";
 
-    if (!assocTimeoutMsg)
+    if (!this->assocAP.assocTimeoutMsg)
     {
         EV << "No association in progress, ignoring frame\n";
         delete frame;
@@ -799,8 +789,8 @@ void Ieee80211MgmtSTAExtended::handleAssociationResponseFrame(Ieee80211Associati
         assocAP = AssociatedAPInfo();
     }
 
-    delete cancelEvent(assocTimeoutMsg);
-    assocTimeoutMsg = NULL;
+    delete cancelEvent(this->assocAP.assocTimeoutMsg);
+    this->assocAP.assocTimeoutMsg = NULL;
 
     if (statusCode!=SC_SUCCESSFUL)
     {
@@ -811,8 +801,9 @@ void Ieee80211MgmtSTAExtended::handleAssociationResponseFrame(Ieee80211Associati
         EV << "Association successful, AP address=" << ap->address << "\n";
 
         // change our state to "associated"
-        isAssociated = true;
         (APInfo&)assocAP = (*ap);
+        isAssociated = true;
+        assocAP.isAssociated = true;
 
         // log the state change
     	connStates.record(mgmt_state);
@@ -845,11 +836,11 @@ void Ieee80211MgmtSTAExtended::handleDisassociationFrame(Ieee80211Disassociation
     EV << "Received Disassociation frame\n";
     const MACAddress& address = frame->getAddress3();  // source address
 
-    if (assocTimeoutMsg)
+    if (this->assocAP.assocTimeoutMsg)
     {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
-        assocTimeoutMsg = NULL;
+        delete cancelEvent(this->assocAP.assocTimeoutMsg);
+        this->assocAP.assocTimeoutMsg = NULL;
     }
     if (!isAssociated || address!=assocAP.address)
     {
@@ -861,22 +852,22 @@ void Ieee80211MgmtSTAExtended::handleDisassociationFrame(Ieee80211Disassociation
     EV << "Setting isAssociated flag to false\n";
     isAssociated = false;
     delete cancelEvent(assocAP.beaconTimeoutMsg);
+    assocAP.isAssociated = false;
     assocAP.beaconTimeoutMsg = NULL;
+
+    // Notify the Dissassociation
+    nb->fireChangeNotification(NF_LINK_BREAK,this->myEntry);
 }
 
 void Ieee80211MgmtSTAExtended::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-	std::cout << "Ieee80211MgmtSTAExtended::handleBeaconFrame" << endl;
-
 	// Paula Uribe: get control info from beacon frame
 	Radio80211aControlInfo *ctrlInfo = (Radio80211aControlInfo*)frame->removeControlInfo();
 
-	std::cout << "Ieee80211MgmtSTAExtended::handleBeaconFrame, CTRLiNFO EXTRACTED" << endl;
-
-	// Paula Uribe: extract rxPower
-	std::cout << "Ieee80211MgmtSTAExtended::handleBeaconFrame, CTRLiNFO DELETED" << endl;
-	double rxPower = ctrlInfo->getRecPow();
-	std::cout << "rxPower = " << rxPower << endl;
+	double rxPower = 0;
+	if (ctrlInfo!=NULL) {
+		rxPower = ctrlInfo->getRecPow();
+	}
 
 	// Paula Uribe: Log the beacon arrival
 
@@ -897,13 +888,24 @@ void Ieee80211MgmtSTAExtended::handleBeaconFrame(Ieee80211BeaconFrame *frame)
     APInfo *ap = lookupAP(frame->getTransmitterAddress());
     ap->rxPower = rxPower;
 
-    // if it is out associate AP, restart beacon timeout
+    // if it is our associate AP, restart beacon timeout and log the rx_power
     if (isAssociated && frame->getTransmitterAddress()==assocAP.address)
     {
-        EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
-        std::cout << "++++++++++++++++ Beacon is from associated AP, restarting beacon timeout timer\n";
 
-    	double rxPWdB = 10 * log(rxPower);
+    	// update the rx_power in the Associated AP info
+    	this->assocAP.rxPower = rxPower;
+    	// notify the notificationBoard about the updated associated
+    	// AP info
+
+    	// notify that we have updated information about the associated AP
+    	AssociatedAPInfo* nf_ap_info = new AssociatedAPInfo(this->assocAP);
+    	nb->fireChangeNotification(NF_L2_ASSOCIATED_AP_UPDATE,nf_ap_info);
+    	delete(nf_ap_info);
+
+        EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
+
+    	double rxPWdB = 10 * log10(rxPower);
+
     	rcvdPowerVectordB.record(rxPWdB);
     	rcvdPowerVectormW.record(rxPower);
 
@@ -912,8 +914,6 @@ void Ieee80211MgmtSTAExtended::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 
         scheduleAt(simTime()+this->max_beacons_missed*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
 
-        //APInfo *ap = lookupAP(frame->getTransmitterAddress());
-        //ASSERT(ap!=NULL);
     }
 
     delete frame;
@@ -950,8 +950,5 @@ void Ieee80211MgmtSTAExtended::storeAPInfo(const MACAddress& address, const Ieee
     ap->ssid = body.getSSID();
     ap->supportedRates = body.getSupportedRates();
     ap->beaconInterval = body.getBeaconInterval();
-
-    //XXX where to get this from?
-    //ap->rxPower = ...
 }
 

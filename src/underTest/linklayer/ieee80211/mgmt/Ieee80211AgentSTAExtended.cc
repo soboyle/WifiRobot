@@ -36,25 +36,20 @@ void Ieee80211AgentSTAExtended::initialize(int stage)
         NotificationBoard *nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
 
-        // JcM Fix: start up: send scan request according the starting time
-        scheduleAt(simTime()+startingTime, new cMessage("startUp", MK_STARTUP));
+        // JcM add: allow to disable the agent
+		// startingTime > 0 to engage the agent
+        if (startingTime!=0) {
+			// JcM Fix: start up: send scan request according the starting time
+			scheduleAt(simTime()+startingTime, new cMessage("startUp", MK_STARTUP));
+        } else {
+        	EV << "Agent Disabled" << endl;
+        }
 
     }
     else if (stage==1)
     {
-        // obtain our address from MAC
-        //cModule *mac = getParentModule()->getSubmodule("mac");
-        //if (!mac)
-        //   error("MAC module not found; it is expected to be next to this submodule and called 'mac'");
-
-        //MACAddress myAddress;
-        //myAddress.setAddress(mac->par("address").stringValue());
-
-
         // JcM Add: Obtain our MAC Address from the InterfaceTable
-
         std::string ifname;
-
 		if (this->gate("mgmtOut")->isConnected()) {
 			cModule* wlan_module = this->gate("mgmtOut")->getNextGate()->getOwnerModule();
 			//TODO:Check this method considering multiples radios
@@ -71,32 +66,29 @@ void Ieee80211AgentSTAExtended::initialize(int stage)
         	{
         		if (ift->getInterface(i)->getName()==ifname) {
         			myEntry = ift->getInterface(i);
+        			EV << "Interface Entry: " << myEntry->getFullName() << endl;
         		}
         	}
+    	} else {
+    		EV << "There is no interface Table to get the interface MAC Address" << endl;
     	}
-
     }
 }
 
 void Ieee80211AgentSTAExtended::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-        handleTimer(msg);
-    else
-        handleResponse(msg);
+    if (msg->isSelfMessage()) {
+        this->handleTimer(msg);
+    } else
+        this->handleResponse(msg);
 }
 
 void Ieee80211AgentSTAExtended::handleTimer(cMessage *msg)
 {
-    if (msg->getKind()==MK_STARTUP)
-    {
+    if (msg->getKind()==MK_STARTUP) {
         EV << "Starting up\n";
         sendScanRequest();
         delete msg;
-    }
-    else
-    {
-        error("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -134,6 +126,7 @@ void Ieee80211AgentSTAExtended::receiveChangeNotification(int category, const cP
         //XXX should check details if it's about this NIC
         EV << "beacon lost, starting scanning again\n";
         getParentModule()->getParentModule()->bubble("Beacon lost!");
+        // TODO: track the associated BSSID in order to send the dissasociate request
         //sendDisassociateRequest();
         sendScanRequest();
     }
@@ -145,7 +138,6 @@ void Ieee80211AgentSTAExtended::sendRequest(Ieee80211PrimRequest *req)
     msg->setControlInfo(req);
     send(msg, "mgmtOut");
 }
-
 
 void Ieee80211AgentSTAExtended::sendScanRequest()
 {
@@ -243,29 +235,6 @@ void Ieee80211AgentSTAExtended::processScanConfirm(Ieee80211Prim_ScanConfirm *re
 	EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
 	sendAuthenticateRequest(bssDesc.getBSSID());
 }
-/*
-void Ieee80211AgentSTAExtended::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
-{
-    dumpAPList(resp);
-
-	int bssIndex = -1;
-    // choose best AP
-    int bssIndex = chooseBSS(resp);
-    if (bssIndex==-1)
-    {
-        EV << "No (suitable) AP found, continue scanning\n";
-        sendScanRequest();
-        return;
-    }
-
-    dumpAPList(resp);
-
-    Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
-    EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
-    sendAuthenticateRequest(bssDesc.getBSSID());
-}
-
-*/
 
 void Ieee80211AgentSTAExtended::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
 {
@@ -330,6 +299,8 @@ void Ieee80211AgentSTAExtended::processAssociateConfirm(Ieee80211Prim_AssociateC
         EV << "Association successful\n";
         // we are happy!
         getParentModule()->getParentModule()->bubble("Associated with AP");
+
+        // notify the association
     }
 }
 
