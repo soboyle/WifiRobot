@@ -59,7 +59,7 @@ typedef struct hop {
 /// \brief Class that implements the Dijkstra Algorithm
 ///
 ///
-class Dijkstra : public cObject {
+class Dijkstra : public cOwnedObject {
 private:
   std::set<nsaddr_t> * nonprocessed_nodes_;
   std::map<nsaddr_t, std::vector<edge*> > * link_array_;
