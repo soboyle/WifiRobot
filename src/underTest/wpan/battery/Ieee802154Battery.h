@@ -19,7 +19,7 @@ public:
 
 private:
 	virtual void    handleSelfMsg(cMessage*);
-	void            receiveChangeNotification(int, cPolymorphic*);
+	virtual void    receiveChangeNotification(int,const cPolymorphic*);
 
 	void            Display();
 

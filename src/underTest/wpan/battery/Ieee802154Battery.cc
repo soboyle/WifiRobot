@@ -118,7 +118,7 @@ void Ieee802154Battery::handleSelfMsg(cMessage* apMsg)
     delete apMsg;
 }
 
-void Ieee802154Battery::receiveChangeNotification (int aCategory, cPolymorphic* aDetails)
+void Ieee802154Battery::receiveChangeNotification (int aCategory, const cPolymorphic* aDetails)
 {
 	//EV << "[Battery]: receiveChangeNotification" << endl;
 	if (aCategory == NF_RADIOSTATE_CHANGED)
