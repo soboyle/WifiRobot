@@ -84,6 +84,8 @@ class INET_API ARP : public cSimpleModule
     ARP() {}
     virtual ~ARP();
     int numInitStages() const {return 5;}
+    const MACAddress getDirectAddressResolution(const IPAddress &) const;
+    const IPAddress getInverseAddressResolution(const MACAddress &) const;
 
   protected:
 

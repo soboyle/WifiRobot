@@ -534,4 +534,47 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     }
 }
 
+const MACAddress ARP::getDirectAddressResolution(const IPAddress & add) const
+{
+	ARPCache::const_iterator it;
+	MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
+    if (globalARP)
+    {
+        it = globalArpCache.find(add);
+        if (it!=globalArpCache.end())
+        	address = (*it).second->macAddress;
+    }
+    else
+    {
+    	it = arpCache.find(add);
+        if (it!=arpCache.end())
+        	address = (*it).second->macAddress;
+    }
+    return address;
+}
+
+const IPAddress ARP::getInverseAddressResolution(const MACAddress &add) const
+{
+	IPAddress address;
+	ARPCache::const_iterator it;
+    if (globalARP)
+    {
+    	for (it = globalArpCache.begin();it!=globalArpCache.end();it++)
+    		if ((*it).second->macAddress==add)
+    		{
+    			address = (*it).first;
+    			return address;
+    		}
+    }
+    else
+    {
+    	for (it = arpCache.begin();it!=arpCache.end();it++)
+    		if ((*it).second->macAddress==add)
+    		{
+    			address = (*it).first;
+    			return address;
+    		}
+    }
+    return address;
+}
 
