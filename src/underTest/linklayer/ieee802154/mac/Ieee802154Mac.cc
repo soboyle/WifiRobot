@@ -1,9 +1,10 @@
 
 #include "Ieee802154Mac.h"
+#include "InterfaceTableAccess.h"
+#include "MACAddress.h"
 
 //#undef EV
 //#define EV (ev.isDisabled() || !m_debug) ? std::cout : ev ==> EV is now part of <omnetpp.h>
-
 
 
 IE3ADDR Ieee802154Mac::addrCount = 0;
@@ -32,7 +33,7 @@ Define_Module(Ieee802154Mac);
 
 Ieee802154Mac::Ieee802154Mac()
 {
-	aExtendedAddress	= addrCount++;
+	// aExtendedAddress	= addrCount++;
 	// buffer
 	txPkt			= NULL;
 	txBeacon			= NULL;
@@ -91,6 +92,52 @@ Ieee802154Mac::~Ieee802154Mac()
 	emptyHListLink(&hlistDLink1,&hlistDLink2);
 }
 
+void Ieee802154Mac::registerInterface()
+{
+    int size = sizeof(IE3ADDR);
+    aExtendedAddress = 0;
+    for (int i=0;i<size;i++)
+    {
+    	if (i<6)
+    	{
+    		IE3ADDR aux = macaddress.getAddressByte(5-i);
+    		aExtendedAddress |=  aux<<(8*i);
+    	}
+    }
+
+    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    if (!ift)
+        return;
+
+    InterfaceEntry *e = new InterfaceEntry();
+
+    // interface name: NetworkInterface module's name without special characters ([])
+    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
+    char *d = interfaceName;
+    for (const char *s = getParentModule()->getFullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+
+    e->setName(interfaceName);
+    delete [] interfaceName;
+
+    // address
+    e->setMACAddress(macaddress);
+    e->setInterfaceToken(macaddress.formInterfaceIdentifier());
+
+    // FIXME: MTU on 802.11 = ?
+    e->setMtu(aMaxMACFrameSize);
+
+    // capabilities
+    e->setBroadcast(true);
+    e->setMulticast(true);
+    e->setPointToPoint(false);
+
+    // add
+    ift->addInterface(e, this);
+}
+
 /** Initialization */
 void Ieee802154Mac::initialize(int stage)
 {
@@ -99,6 +146,18 @@ void Ieee802154Mac::initialize(int stage)
 
 	if (0 == stage)
 	{
+        const char *addressString = par("address");
+        if (!strcmp(addressString, "auto")) {
+        	// assign automatic address
+        	macaddress = MACAddress::generateAutoAddress();
+        	// change module parameter from "auto" to concrete address
+        	par("address").setStringValue(macaddress.str().c_str());
+        }
+        else
+        	macaddress.setAddress(addressString);
+
+		registerInterface();
+
 		// get gate ID
         	mUppergateIn  = findGate("uppergateIn");
 		mUppergateOut = findGate("uppergateOut");

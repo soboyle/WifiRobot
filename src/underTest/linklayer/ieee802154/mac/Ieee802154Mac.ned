@@ -22,6 +22,7 @@ simple Ieee802154Mac
         double gtsPayload;			// payload of data frames transmitted in GTS, copied from traffic module
         // whether acking for Data pkts received in GTS
         bool ack4Gts;					// whether acking for Data pkts received in GTS
+        string address = default("auto");
         @display("i=block/layer");
     gates:
         input uppergateIn; 			// from the upper layer

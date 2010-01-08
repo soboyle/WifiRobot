@@ -13,6 +13,7 @@
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "IPassiveQueue.h"
+#include "MACAddress.h"
 
 /**
  * IEEE 802.15.4 Media Access Control (MAC) Layer
@@ -281,6 +282,7 @@ protected:
 	virtual void    initialize    (int);
 	virtual void    initializeQueueModule    ();
 	virtual int    numInitStages    () const { return 3; }
+	virtual void registerInterface();
 	//@}
 
 	virtual void    finish    ();
@@ -546,6 +548,7 @@ protected:
 	//@{
 	/** @brief MAC extended address, in simulation use only 16 bit instead of 64 bit */
 	IE3ADDR aExtendedAddress;
+	MACAddress macaddress;//
 
 	/** @brief MAC PIB attributes */
 	MAC_PIB mpib;
