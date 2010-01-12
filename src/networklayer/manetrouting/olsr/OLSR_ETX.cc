@@ -1682,8 +1682,12 @@ OLSR_ETX::send_tc() {
 	msg.tc().count = 0;
 	msg.tc().set_qos_behaviour(parameter_.link_quality());
 
-	switch (parameter_.mpr_algorithm()) {
-		case OLSR_ETX_MPR_OLSRD:
+	//switch (parameter_.mpr_algorithm()) {
+	//case OLSR_ETX_MPR_OLSRD:
+	// Reported by Mohamed Belhassen
+	switch (parameter_.tc_redundancy()) {
+		case OLSR_ETX_TC_ALL_NEIGHBOR_SET_REDUNDANCY:
+
 		// Report all 1 hop neighbors we have
 			for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++) {
 				OLSR_ETX_nb_tuple* nb_tuple = *it;
@@ -1711,7 +1715,9 @@ OLSR_ETX::send_tc() {
 			break;
 
 		default:
-			if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET) {
+			//if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET) {
+			// Reported by Mohamed Belhassen
+			if (parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY) {
       // Report our MPR selector set
 				for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++) {
 					OLSR_ETX_mprsel_tuple* mprsel_tuple = *it;
@@ -1736,7 +1742,9 @@ OLSR_ETX::send_tc() {
 				}
 			}
 
-			if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SET) {
+		//	if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SET) {
+		// Reported by Mohamed Belhassen
+			if ((parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY)||(parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY)) {
       // Also report our MPR set
 				for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++) {
 					nsaddr_t mpr_addr = *it;

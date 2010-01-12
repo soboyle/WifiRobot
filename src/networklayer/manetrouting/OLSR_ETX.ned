@@ -13,7 +13,12 @@ simple OLSR_ETX extends BaseRouting
         int routing_algorithm = default(1);
         int Link_quality = default(2);
         bool Fish_eye = default(false);
-        int Tc_redundancy = default(3);
+        int Tc_redundancy @enum(0,1,2,3)= default(3);
+        // Reported by Mohamed Belhassen
+        // 0 OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY
+        // 1 OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY
+        // 2 OLSR_ETX_TC_ALL_NEIGHBOR_SET_REDUNDANCY
+        // 3 disable
         bool Link_delay = default(true);
         double C_alpha = default(0.2);
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface EXPERIMENTAL

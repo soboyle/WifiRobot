@@ -58,6 +58,10 @@ class OLSR_ETX_parameter : public cObject{
 #define OLSR_ETX_TC_REDUNDANCY_MPR_SET       0x1
   // publish only nodes in mpr sel set
 #define OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET   0x2
+
+#define OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY   0
+#define OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY   1
+#define OLSR_ETX_TC_ALL_NEIGHBOR_SET_REDUNDANCY   2
   int    tc_redundancy_;
 
   /// Link quality extension
