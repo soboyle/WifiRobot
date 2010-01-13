@@ -108,5 +108,11 @@ class INET_API ARP : public cSimpleModule
 
 };
 
+class INET_API ArpAccess : public ModuleAccess<ARP>
+{
+  public:
+	  ArpAccess() : ModuleAccess<ARP>("arp") {}
+};
+
 #endif
 
