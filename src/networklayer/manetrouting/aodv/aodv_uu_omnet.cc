@@ -1009,8 +1009,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 		if (delEntry)
 		{
 			RERR* rerr = rerr_create(0, destAddr, 0);
-			DEBUG(LOG_DEBUG, 0, "Sending RERR to prev hop %s for unknown dest %s",
-					ip_to_str(src_addr), ip_to_str(dest_addr));
+			DEBUG(LOG_DEBUG, 0, "setRoute Sending for unknown dest %s", ip_to_str(destAddr));
 
     /* Unicast the RERR to the source of the data transmission
      * if possible, otherwise we broadcast it. */
@@ -1066,8 +1065,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 		if (delEntry)
 		{
 			RERR* rerr = rerr_create(0, destAddr, 0);
-			DEBUG(LOG_DEBUG, 0, "Sending RERR to prev hop %s for unknown dest %s",
-					ip_to_str(src_addr), ip_to_str(dest_addr));
+			DEBUG(LOG_DEBUG, 0, "setRoute Sending for unknown dest %s", ip_to_str(destAddr));
 
     /* Unicast the RERR to the source of the data transmission
      * if possible, otherwise we broadcast it. */
