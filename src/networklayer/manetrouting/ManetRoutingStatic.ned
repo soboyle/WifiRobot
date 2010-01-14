@@ -54,7 +54,7 @@ module ManetRoutingStatic
                 internet_gw_mode = 0;
                 receive_n_hellos = 1;
                 ratelimit = 1000;
-                llfeedback = 0; //1000, not suport inter layer communication
+                llfeedback = false; //1000, not suport inter layer communication
                 wait_on_reboot = 0;
                 active_timeout = 6000; // time in ms
                 internet_gw_address = "0.0.0.0";
@@ -78,7 +78,7 @@ module ManetRoutingStatic
                 RexmtBufferSize = -1; //MAINT_BUF_MAX_LEN
                 MaintHoldoffTime = -1; //250 MILLISECONDS
                 MaxMaintRexmt = -1; //2
-                TryPassiveAcks = -1; //1
+                TryPassiveAcks = true; //1
                 PassiveAckTimeout = -1; //100 MILLISECONDS
                 GratReplyHoldOff = -1; //1 SECONDS
                 MAX_SALVAGE_COUNT = -1; //15
@@ -98,7 +98,7 @@ module ManetRoutingStatic
                 Hello_ival = 2;
                 Tc_ival = 5;
                 Mid_ival = 5;
-                use_mac = false;
+                use_mac = 0;
                 Mpr_algorithm = 1;
                 routing_algorithm = 1;
                 Link_quality = 2;
@@ -109,8 +109,8 @@ module ManetRoutingStatic
         }
         dsdvprotocol: DSDV_2 {
             parameters:
-                hellomsgperiod_DSDV = 1; //Period of DSDV hello message generation [seconds] 
-                timetolive_routing_entry = 5; // ;[seconds]
+                hellomsgperiod_DSDV = 1s; //Period of DSDV hello message generation [seconds] 
+                timetolive_routing_entry = 5s; // ;[seconds]
                 netmask = "255.255.0.0"; //
                 MaxVariance_DSDV = 1;
                 RNGseed_DSDV = 0;
