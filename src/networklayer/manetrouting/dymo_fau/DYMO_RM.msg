@@ -20,15 +20,12 @@
 cplusplus {{
 #include "DYMO_PacketBBMessage_m.h"
 #include "DYMO_AddressBlock.h"
-
+#include "InspectorHelpers.h"
 #include <vector>
 #include <sys/types.h>
 
-using namespace std;
 
-typedef vector<DYMO_AddressBlock> VectorOfDYMOAddressBlocks;
-
-#include "InspectorHelpers.h"
+typedef std::vector<DYMO_AddressBlock> VectorOfDYMOAddressBlocks;
 
 }}
 

@@ -23,13 +23,8 @@ cplusplus {{
 
 #include <vector>
 #include <sys/types.h>
-
-using namespace std;
-
-typedef vector<DYMO_AddressBlock> VectorOfDYMOAddressBlocks;
-
 #include "InspectorHelpers.h"
-
+typedef std::vector<DYMO_AddressBlock> VectorOfDYMOAddressBlocks;
 }}
 
 
