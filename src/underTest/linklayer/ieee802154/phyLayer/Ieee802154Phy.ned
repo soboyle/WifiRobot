@@ -21,6 +21,11 @@ simple Ieee802154Phy
         // used by Ieee802154RadioModel
         double snirThreshold @unit("dB") = default(4dB); 
         double carrierFrequency @unit("Hz") = default(2.4GHz); 
+                // parameters for energy usage
+        double usage_radio_idle @unit("mA");
+        double usage_radio_recv @unit("mA");
+        double usage_radio_sleep @unit("mA");
+
 
     gates:
         input uppergateIn;			// from Mac

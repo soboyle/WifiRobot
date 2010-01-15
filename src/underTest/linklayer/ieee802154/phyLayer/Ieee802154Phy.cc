@@ -1,5 +1,5 @@
 #include "Ieee802154Phy.h"
-
+#include "BasicBattery.h"
 // #undef EV
 //#define EV (ev.isDisabled() || !m_debug) ? std::cout : ev  ==> EV is now part of <omnetpp.h>
 
@@ -14,6 +14,66 @@ Ieee802154Phy::Ieee802154Phy() : rs(this->getId())
 	TRX_timer = NULL;
 	TxOver_timer = NULL;
 
+}
+
+void Ieee802154Phy::registerBattery()
+{
+	BasicBattery *bat = BatteryAccess().getIfExists();
+	if (bat)
+	{
+		//int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;
+		// read parameters
+			double mUsageRadioIdle		= par("usage_radio_idle");
+			double mUsageRadioRecv		= par("usage_radio_recv");
+			double mUsageRadioSleep		= par("usage_radio_sleep");
+			double mTransmitterPower		= par("transmitterPower");
+
+			double trans_power_dbm = 10*log10(mTransmitterPower);
+				// calculation of usage_radio_send
+				// based on the values in Olaf Landsiedel's AEON paper
+				/*if (trans_power_dbm <= -18)
+					mUsageRadioSend = 8.8;
+				else if (trans_power_dbm <= -13)
+					mUsageRadioSend = 9.8;
+				else if (trans_power_dbm <= -10)
+					mUsageRadioSend = 10.4;
+				else if (trans_power_dbm <= -6)
+					mUsageRadioSend = 11.3;
+				else if (trans_power_dbm <= -2)
+					mUsageRadioSend = 15.6;
+				else if (trans_power_dbm <= 0)
+					mUsageRadioSend = 17;
+				else if (trans_power_dbm <= 3)
+					mUsageRadioSend = 20.2;
+				else if (trans_power_dbm <= 4)
+					mUsageRadioSend = 22.5;
+				else if (trans_power_dbm <= 5)
+					mUsageRadioSend = 26.9;
+				else
+					error("[Battery]: transmitter Power too high!");*/
+
+			// based on the values for CC2420 in howitt paper
+			double mUsageRadioSend;
+			if (trans_power_dbm <= -25)
+				mUsageRadioSend = 8.53;
+			else if (trans_power_dbm <= -15)
+				mUsageRadioSend = 9.64;
+			else if (trans_power_dbm <= -10)
+				mUsageRadioSend = 10.68;
+			else if (trans_power_dbm <= -7)
+				mUsageRadioSend = 11.86;
+			else if (trans_power_dbm <= -5)
+				mUsageRadioSend = 13.11;
+			else if (trans_power_dbm <= -3)
+				mUsageRadioSend = 14.09;
+			else if (trans_power_dbm <= -1)
+				mUsageRadioSend = 15.07;
+			else if (trans_power_dbm <= 0)
+				mUsageRadioSend = 16.24;
+			else
+				error("[Battery]: transmitter Power too high!");
+		bat->registerWirelessDevice(rs.getRadioId(),mUsageRadioIdle,mUsageRadioRecv,mUsageRadioSend,mUsageRadioSleep);
+	}
 }
 
 Ieee802154Phy::~Ieee802154Phy()
@@ -115,6 +175,7 @@ void Ieee802154Phy::initialize(int stage)
         }
         else
         	cc->updateHostChannel(myHostRef, getChannelNumber());
+        registerBattery();
     }
 }
 
