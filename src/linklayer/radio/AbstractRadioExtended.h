@@ -151,6 +151,8 @@ class INET_API AbstractRadioExtended : public ChannelAccessExtended
     virtual void disconnectReceiver();
     virtual void connectReceiver();
 
+    virtual void registerBattery();
+
 
   protected:
 

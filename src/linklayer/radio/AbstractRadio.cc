@@ -22,7 +22,7 @@
 #include "PhyControlInfo_m.h"
 #include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
 #include "Radio80211aControlInfo_m.h"
-
+#include "BasicBattery.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -99,6 +99,7 @@ void AbstractRadio::initialize(int stage)
     {
         // tell initial values to MAC; must be done in stage 1, because they
         // subscribe in stage 0
+    	registerBattery();
         nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
         nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
     }
@@ -723,4 +724,20 @@ void AbstractRadio::updateSensitivity(double rate)
     EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
 
+void AbstractRadio::registerBattery()
+{
+	BasicBattery *bat = BatteryAccess().getIfExists();
+	if (bat)
+	{
+		//int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;
+		// read parameters
+		double mUsageRadioIdle		= par("usage_radio_idle");
+		double mUsageRadioRecv		= par("usage_radio_recv");
+		double mUsageRadioSleep		= par("usage_radio_sleep");
+		double mUsageRadioSend	    = par("usage_radio_send");
+		if (mUsageRadioIdle<0 || mUsageRadioRecv<0 || mUsageRadioSleep<0 || mUsageRadioSend < 0)
+			return;
+		bat->registerWirelessDevice(rs.getRadioId(),mUsageRadioIdle,mUsageRadioRecv,mUsageRadioSend,mUsageRadioSleep);
+	}
+}
 

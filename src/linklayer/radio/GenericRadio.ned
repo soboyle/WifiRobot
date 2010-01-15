@@ -42,6 +42,11 @@ simple GenericRadio extends PropagationModel
         double bandwidth @unit("Hz"); // signal bandwidth, used for bit error calculation
         string modulation; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
         string attenuationModel = default("PathLossReceptionModel");
+        
+        double usage_radio_idle @unit(mA) = default (-1mA); // disable battery registration
+        double usage_radio_recv @unit(mA) = default (-1mA); // disable battery registration
+        double usage_radio_sleep @unit(mA) = default (-1mA); // disable battery registration 
+        double usage_radio_send @unit(mA) = default (-1mA); // disable battery registration 
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)
         output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)

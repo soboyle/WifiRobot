@@ -135,6 +135,7 @@ class INET_API AbstractRadio : public ChannelAccess
 
     /** @brief updates the sensitivity value if the bitrate varies */
     virtual void updateSensitivity(double bitrate);
+    virtual void registerBattery();
 
   protected:
     IRadioModel *radioModel;

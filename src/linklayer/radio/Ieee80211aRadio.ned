@@ -58,6 +58,11 @@ simple Ieee80211aRadio extends PropagationModel
         
         string attenuationModel = default("PathLossReceptionModel");// Values "pathlost" or "tworay" 
         @display("i=block/wrxtx");
+        double usage_radio_idle @unit(mA) = default (-1mA); // disable battery registration
+        double usage_radio_recv @unit(mA) = default (-1mA); // disable battery registration
+        double usage_radio_sleep @unit(mA) = default (-1mA); // disable battery registration 
+        double usage_radio_send @unit(mA) = default (-1mA); // disable battery registration 
+        
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)
         output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
