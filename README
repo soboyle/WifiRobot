@@ -67,6 +67,7 @@ Bottom-up:
      ext/                External interface
      experimental/       Experimental protocols
      underTest/          protocols that must be tested
+     battery/            Symple battery module
 
 
    network/              L3 (network layer) protocols
@@ -81,7 +82,15 @@ Bottom-up:
      ldp/                LDP signalling protocol for MPLS
      rsvp_te/            RSVP-TE signalling protocol for MPLS (will be replaced soon)
      scenario/           specific for RSVP-TE (will be replaced soon)
-     manetrouting        Manet routing protocols
+     manetrouting/       Manet routing protocols
+        aodv             AODV-UU protocol
+        dsr              DSR-UU protocol
+        dymo             dymo-um protocol
+        dymo_fau         dymo-fau
+        olsr             OLSR-UM and OLSR-UM with ETX
+        manager          Start module (load the selected routing protocol in memory)
+        base             base class for manet routing protocol and Uint128 multicontainer address class
+
 
    transport/            transport layer protocols
      contract/           API to transport layer functionality
