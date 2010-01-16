@@ -97,7 +97,7 @@ int InetSimpleBattery::registerDevice(cObject *id,int numAccts)
 	}
 
 	DeviceEntry *device = new DeviceEntry();
-	device->owner == id;
+        device->owner = id;
 	device->numAccts = numAccts;
 	device->accts = new double[numAccts];
 	device->times = new simtime_t[numAccts];
