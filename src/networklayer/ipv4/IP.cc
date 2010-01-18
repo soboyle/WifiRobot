@@ -484,12 +484,6 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
 void IP::reassembleAndDeliver(IPDatagram *datagram)
 {
-   // If the protocol is Dsr Send directely the datagram to manet routing
-    if ( datagram->getTransportProtocol()==IP_PROT_DSR)
-    {
-        controlMessageToManetRouting(MANET_ROUTE_NOROUTE,datagram);
-        return;
-    }
     // reassemble the packet (if fragmented)
     if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
     {
@@ -520,6 +514,11 @@ void IP::reassembleAndDeliver(IPDatagram *datagram)
     {
         // incoming ICMP packets are handled specially
         handleReceivedICMP(check_and_cast<ICMPMessage *>(packet));
+    }
+    else if (protocol==IP_PROT_DSR)
+    {
+    	// If the protocol is Dsr Send directely the datagram to manet routing
+        controlMessageToManetRouting(MANET_ROUTE_NOROUTE,datagram);
     }
     else if (protocol==IP_PROT_IP)
     {
