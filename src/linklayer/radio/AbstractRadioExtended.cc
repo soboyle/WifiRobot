@@ -488,6 +488,9 @@ void AbstractRadioExtended::handleLowerMsgStart(AirFrame* airframe)
 
     }
 
+    if (distance<0.0001)
+    	distance = 0.0001; // minimum distance 0.1 millimeter
+
     double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), frequency, distance);
     airframe->setPowRec(rcvdPower);
     // store the receive power in the recvBuff

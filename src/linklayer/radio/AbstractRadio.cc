@@ -430,6 +430,8 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
     const Coord& framePos = airframe->getSenderPos();
     double distance = myPos.distance(framePos);
 
+    if (distance<0.0001)
+    	distance = 0.0001; // minimum distance 0.1 millimeter
     // calculate receive power
     double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
     airframe->setPowRec(rcvdPower);
