@@ -26,6 +26,7 @@
 
 
 
+
 static const unsigned short comb_calc[15][15]=
 {
 {    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },
@@ -59,12 +60,12 @@ static unsigned short comb(int n,int k)
 {
     ASSERT(n>=1 && n<=14 && k>=1 && k<=14);
     return comb_calc[n-1][k-1];
-}    
+}
 
 
 
 static double Pd(int d, double Pb){
-	
+
 	long double sum=0.0;
 	int k;
 	if(d%2 == 1){
@@ -78,7 +79,7 @@ static double Pd(int d, double Pb){
 	}
 	//printf("prob=%f d=%d sum=%f \n",Pb,d, sum);
 	return sum;
-	
+
 	//return pow(4*Pb*(1-Pb), d/2);
 }
 
@@ -104,7 +105,7 @@ static double Pb(int rate, double prob){
 	default:
 	;
 	}
-	
+
 	return probc;
 }
 
@@ -144,7 +145,7 @@ static double ber_64qam(double snir, double bandwidth, double bitrate, char chan
 Register_Class(Ieee80211gRadioModel);
 
 double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
-	
+
         BerList *berlist;
 
         if (phyOpMode=='b')
@@ -156,7 +157,7 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
            else if (speed<=5&& speed<11)
                 berlist = &r5m;
            else
-                berlist = &r11m;	
+                berlist = &r11m;
         }
         else
         {
@@ -174,8 +175,8 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
                 berlist = &r36m;
            else if (speed<=48&& speed<54)
                 berlist = &r48m;
-           else 
-                berlist = &r54m;	
+           else
+                berlist = &r54m;
         }
         LongBer * pre;
         LongBer * pos;
@@ -188,7 +189,7 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
                       break;
             }
          }
- 
+
          if (j==0)
              pre = NULL;
          else
@@ -214,7 +215,7 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
                    break;
                 }
           }
- 
+
          if (j==0)
          {
              snrdata2.snr=-1;
@@ -245,7 +246,7 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
               else
                 snrdata4 =*(pre->snrlist.begin()+j-1);
          }
-         
+
 
         if (snrdata2.snr==-1)
         {
@@ -273,17 +274,17 @@ double Ieee80211gRadioModel::getPer(double speed, double tsnr, int tlen){
 		per2 = snrdata3.ber +  (snrdata4.ber-snrdata3.ber)/(snrdata4.snr-snrdata3.snr)*(tsnr- snrdata3.snr);
         }
 
-      
+
 	if (per1!=-1 && per2!=-1){
 		if (pos->longpkt != pre->longpkt)
 			per = per2 +  (per1- per2)/(pos->longpkt - pre->longpkt)*(tlen-pre->longpkt);
 		else
 			per = per2;
 	}
-	else 
+	else
 		if (per1!=-1){
 			per = per1;
-		}else 
+		}else
 			if (per2!=-1){
 				per = per2;
 			}else {EV << "No PER available";}
@@ -306,21 +307,21 @@ void Ieee80211gRadioModel::parseFile(const char *filename)
 	{
 		// '#' line
 		std::string::size_type found=line.find('#');
-		if (found == 0) 
+		if (found == 0)
 			continue;
 		if (found != std::string::npos)
 			subline = line;
 		else
 			subline = line.substr(0,found);
 		found=subline.find("$self");
-		if (found == std::string::npos) 
+		if (found == std::string::npos)
 			continue;
-		// Node Id 
+		// Node Id
 		found = subline.find("add");
 		if (found== std::string::npos)
                      continue;
 		// Initial position
-                
+
 		std::string::size_type pos1 = subline.find("Mode");
                 std::string::size_type pos2 = subline.find("Mb");
                 BerList *berlist;
@@ -351,7 +352,7 @@ void Ieee80211gRadioModel::parseFile(const char *filename)
                     berlist = &r48m;
                 else if (!strcmp(substr.c_str(),"54"))
                     berlist = &r54m;
-                else 
+                else
                     continue;
 
                 std::string parameters = subline.substr (pos2+3,std::string::npos);
@@ -428,7 +429,9 @@ void Ieee80211gRadioModel::parseFile(const char *filename)
                 }
 
     }
+
     in.close();
+
 	// exist data?
 }
 
@@ -539,7 +542,7 @@ Ieee80211gRadioModel::~Ieee80211gRadioModel()
 void Ieee80211gRadioModel::initializeFrom(cModule *radioModule)
 {
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
-    
+
     phyOpMode=radioModule->par("phyOpMode");
     channelModel=radioModule->par("channelModel");
     if (phyOpMode==1)
@@ -548,16 +551,20 @@ void Ieee80211gRadioModel::initializeFrom(cModule *radioModule)
           phyOpMode='g';
     else
          phyOpMode='b';
+    parseTable = NULL;
+
     snirVector.setName("snirVector");
     i=0;
     const char *fname = radioModule->par("berTableFile");
     std::string name (fname);
     if (!name.empty())
     {
+      //    parseTable = new BerParseFile(phyOpMode);
+      //    parseTable->parseFile(fname);
           parseFile(fname);
           fileBer=true;
     }
-    else 
+    else
           fileBer=false;
 }
 
@@ -587,7 +594,7 @@ bool Ieee80211gRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList
 
     cPacket *frame = airframe->getEncapsulatedMsg();
     EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
-	
+
 	if(i%1000==0){
 		snirVector.record(10*log10(snirMin));
 		i=0;
@@ -627,12 +634,12 @@ bool Ieee80211gRadioModel::isPacketOK(double snirMin, int lengthMPDU, double bit
         berMPDU = 0.5 * (1 - 1 / sqrt(pow(2.0, 4))) * erfc(snirMin * BANDWIDTH / bitrate);
     else if(bitrate == 11E+6)                        // CCK, modelled with 256-QAM
         berMPDU = 0.25 * (1 - 1 / sqrt(pow(2.0, 8))) * erfc(snirMin * BANDWIDTH / bitrate);
-    
+
     else{//802.11g rates
 	//PLCP Header 24bits, BPSK, r=1/2, 6Mbps
 	berHeader=ber_bpsk(snirMin, BANDWIDTH , 6E+6, channelModel);
 	berHeader=Pb(1, berHeader);
-	
+
         if (fileBer)
            berMPDU = 0;
         else
@@ -676,8 +683,8 @@ bool Ieee80211gRadioModel::isPacketOK(double snirMin, int lengthMPDU, double bit
 		default:
 			berMPDU=0;
 		}
-			
-	
+
+
 	}
 
 
@@ -693,7 +700,10 @@ bool Ieee80211gRadioModel::isPacketOK(double snirMin, int lengthMPDU, double bit
     // probability of no bit error in the MPDU
     double MpduNoError;
     if (fileBer)
-       MpduNoError=1-getPer(bitrate,snirMin,lengthMPDU);
+       if (parseTable)
+    	   MpduNoError=1-parseTable->getPer(bitrate,snirMin,lengthMPDU);
+       else
+    	   MpduNoError=1-getPer(bitrate,snirMin,lengthMPDU);
     else
        MpduNoError = pow(1.0 - berMPDU, lengthMPDU);
     EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" lengthMPDU: "<<lengthMPDU<<" PER: "<<1-MpduNoError<<endl;

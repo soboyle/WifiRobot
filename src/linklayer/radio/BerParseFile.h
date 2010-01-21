@@ -17,31 +17,20 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE80211GRADIOMODEL_H
-#define IEEE80211GRADIOMODEL_H
+#ifndef __BERPARSEFILE_H
+#define __BERPARSEFILE_H
 
-#include "IRadioModel.h"
-#include "BerParseFile.h"
-
+#include <vector>
+#include <math.h>
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
  * See the NED file for more info.
  */
 
-
-
-
-class INET_API Ieee80211gRadioModel : public IRadioModel
+class BerParseFile
 {
   protected:
-    double snirThreshold;
-    cOutVector snirVector;
-    int i;
-    BerParseFile *parseTable;
-
-    char phyOpMode, channelModel;
-
     struct SnrBer
     {
         double snr;
@@ -52,9 +41,11 @@ class INET_API Ieee80211gRadioModel : public IRadioModel
            ber=m.ber;
            return *this;
         }
+		bool operator < (SnrBer const &o) const
+		{
+			return (snr < o.snr)?true:false;
+		}
     };
-
-
     typedef std::vector<SnrBer> SnrBerList;
     struct LongBer
     {
@@ -64,36 +55,24 @@ class INET_API Ieee80211gRadioModel : public IRadioModel
 
     typedef std::vector<LongBer*> BerList;
 // A and G
-    BerList r6m;
-    BerList r9m;
-    BerList r12m;
-    BerList r18m;
-    BerList r24m;
-    BerList r36m;
-    BerList r48m;
-    BerList r54m;
-// B
-    BerList r1m;
-    BerList r2m;
-    BerList r5m;
-    BerList r11m;
+	typedef std::vector<BerList> BerTable;
+	BerTable berTable;
+	char phyOpMode;
     bool fileBer;
-    void parseFile(const char *filename);
+
+    int getTablePosition (double speed);
+    void clearBerTable();
+    double dB2fraction(double dB)
+    {
+        return pow(10.0, (dB / 10));
+    }
+public:
+	void parseFile(const char *filename);
+	bool isFile(){return fileBer;}
+	void setPhyOpMode(char p);
     double getPer(double speed, double tsnr, int tlen);
-
-  public:
-    virtual void initializeFrom(cModule *radioModule);
-
-    virtual double calculateDuration(AirFrame *airframe);
-
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
-    ~Ieee80211gRadioModel();
-
-  protected:
-    // utility
-    virtual bool isPacketOK(double snirMin, int lengthMPDU, double bitrate);
-    // utility
-    virtual double dB2fraction(double dB);
+    BerParseFile(char p){setPhyOpMode(phyOpMode); fileBer = false;}
+	~BerParseFile();
 };
 
 #endif
