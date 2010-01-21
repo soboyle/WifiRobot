@@ -29,6 +29,7 @@
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
 
+#define MIN_DISTANCE 0.001 // minimum distance 1 millimeter
 
 AbstractRadioExtended::AbstractRadioExtended() : rs(this->getId())
 {
@@ -488,8 +489,8 @@ void AbstractRadioExtended::handleLowerMsgStart(AirFrame* airframe)
 
     }
 
-    if (distance<0.0001)
-    	distance = 0.0001; // minimum distance 0.1 millimeter
+    if (distance<MIN_DISTANCE)
+    	distance = MIN_DISTANCE;
 
     double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), frequency, distance);
     airframe->setPowRec(rcvdPower);
