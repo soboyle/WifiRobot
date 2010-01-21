@@ -607,7 +607,7 @@ PER instproc loadPERTable80211gTrivellato {} {
     $self add Mode36Mb   256  22.0016  0.0013
     $self add Mode36Mb   256  23.0041  0.0003
     $self add Mode36Mb   256  24.0008  0.0004
-    $self add Mode36Mb   256  2.5  0
+    $self add Mode36Mb   256  25  0
     $self add Mode36Mb   512  0.00044442  1
     $self add Mode36Mb   512  1.0015  1
     $self add Mode36Mb   512  2.0022  1
