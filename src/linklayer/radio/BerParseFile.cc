@@ -22,7 +22,7 @@
 #include <string>
 #include "BerParseFile.h"
 #include "omnetpp.h"
-
+#include <algorithm>
 
 void BerParseFile::clearBerTable()
 {
