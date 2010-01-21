@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 #include "BerParseFile.h"
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include <algorithm>
 
 void BerParseFile::clearBerTable()
@@ -117,10 +117,10 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
 	snrdata4.snr=-1;
 	snrdata4.ber=-1;
 
-	if (tsnr>pos->snrlist.end()->snr)
+	if (tsnr>pos->snrlist[pos->snrlist.size()-1].snr)
 	{
-		snrdata1 = (*pos->snrlist.end());
-		snrdata2 = (*pos->snrlist.end());
+		snrdata1 = pos->snrlist[pos->snrlist.size()-1];
+		snrdata2 = pos->snrlist[pos->snrlist.size()-1];
 	}
 	else
 	{
@@ -138,18 +138,18 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
 		else
 		{
 			if (j==pos->snrlist.size())
-				snrdata2 = *(pos->snrlist.begin()+j-2);
+				snrdata2 = pos->snrlist[j-2];
 			else
-				snrdata2 = *(pos->snrlist.begin()+j-1);
+				snrdata2 = pos->snrlist[j-1];
 		}
 	}
 
     if (pre==NULL)
 		pre = pos;
-	if (tsnr>pre->snrlist.end()->snr)
+	if (tsnr>pre->snrlist[pre->snrlist.size()-1].snr)
 	{
-		snrdata3 = (*pre->snrlist.end());
-		snrdata4 = (*pre->snrlist.end());
+		snrdata3 = pre->snrlist[pre->snrlist.size()-1];
+		snrdata4 = pre->snrlist[pre->snrlist.size()-1];
 	}
 	else
 	{
@@ -162,9 +162,9 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
 		if (j!=0)
 		{
 			if (j==pre->snrlist.size())
-				snrdata4 =*(pre->snrlist.begin()+j-2);
+				snrdata4 = pre->snrlist[j-2];
 			else
-				snrdata4 =*(pre->snrlist.begin()+j-1);
+				snrdata4 = pre->snrlist[j-1];
 		}
 
 	}
@@ -334,7 +334,19 @@ void BerParseFile::parseFile(const char *filename)
 		{
 			l = new LongBer;
 			l->longpkt = pkSize;
-			berlist->push_back(l);
+
+			unsigned int position = 0;
+			for (position =0;position<berlist->size();position++)
+			{
+				LongBer *aux = *(berlist->begin()+position);
+
+				if (l->longpkt < aux->longpkt)
+					break;
+			}
+			if (position==berlist->size())
+				berlist->push_back(l);
+			else
+				berlist->insert(berlist->begin()+position,l);
 		}
 		SnrBer snrdata;
 		snrdata.snr=snr;
@@ -343,23 +355,6 @@ void BerParseFile::parseFile(const char *filename)
 		std::sort (l->snrlist.begin (),l->snrlist.end (), std::less<SnrBer> ());
     }
     in.close();
-
-    LongBer * pos;
-    unsigned int j;
-    for (j=0;j<berTable[7].size();j++)
-    {
-    	pos = *(berTable[7].begin()+j);
-    	if (pos->longpkt >=512)
-    	{
-    		break;
-    	}
-    }
-    for (j=0;j<pos->snrlist.size();j++)
-     {
-		   SnrBer snrdata;
-           snrdata = pos->snrlist[j];
-           printf (" %f \n",snrdata.snr);
-     }
 
 	// exist data?
 	if (phyOpMode=='b')
