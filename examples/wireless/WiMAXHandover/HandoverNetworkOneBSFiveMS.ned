@@ -3,15 +3,12 @@ package inet.examples.wireless.WiMAXHandover;
 // Roland Siedlaczek
 //
 
-
-import inet.examples.wireless.WiMAXHandover.Bild;
-import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.underTest.nodes.WiMAX.WiMAXAP;
+import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.world.ChannelControl;
 
 
-
-module HandoverNetworkOneBSFiveMS
+network HandoverNetworkOneBSFiveMS
 {
     parameters:
         double playgroundSizeX;
@@ -50,9 +47,3 @@ module HandoverNetworkOneBSFiveMS
         }
     connections allowunconnected:
 }
-
-//network HandoverNetworkOneBSFiveMS extends HandoverNetworkOneBSFiveMS
-//{
-//    parameters:
-//}
-

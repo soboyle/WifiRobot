@@ -24,7 +24,7 @@ import inet.underTest.nodes.WiMAX.WiMAXAP;
 import inet.world.ChannelControl;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 
-module HandoverNetwork
+network HandoverNetwork
 {
     parameters:
         double playgroundSizeX;
@@ -82,9 +82,3 @@ module HandoverNetwork
         }
     connections allowunconnected:
 }
-
-network handoverNetwork extends HandoverNetwork
-{
-    parameters:
-}
-

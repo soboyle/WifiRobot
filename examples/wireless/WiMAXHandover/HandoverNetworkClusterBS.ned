@@ -5,21 +5,16 @@ package inet.examples.wireless.WiMAXHandover;
 
 
 import inet.underTest.nodes.WiMAX.WiMAXAP;
-import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.world.ChannelControl;
 
 
-network HandoverNetworkClusterB
+network HandoverNetworkClusterBS
 {
     parameters:
         double playgroundSizeX;
         double playgroundSizeY;
         @display("bgb=1000,1000");
     submodules:
-        ms2: WiMAXMS {
-            parameters:
-                @display("p=250,300;i=device/cellphone_s;r=,,#707070");
-        }
         bs1: WiMAXAP {
             parameters:
                 @display("p=300,300;i=device/antennatower_l;r=,,#707070");
@@ -36,7 +31,7 @@ network HandoverNetworkClusterB
             parameters:
                 @display("p=400,473;i=device/antennatower_l;r=,,#707070");
         }
-        bs7: WiMAXAP {
+        bs5: WiMAXAP {
             parameters:
                 @display("p=500,300;i=device/antennatower_l;r=,,#707070");
         }
@@ -44,10 +39,9 @@ network HandoverNetworkClusterB
             parameters:
                 @display("p=400,127;i=device/antennatower_l;r=,,#707070");
         }
-        bs5: WiMAXAP {
+        bs7: WiMAXAP {
             parameters:
                 @display("p=200,127;i=device/antennatower_l;r=,,#707070");
-
         }
         channelcontrol: ChannelControl {
             parameters:
@@ -57,9 +51,3 @@ network HandoverNetworkClusterB
         }
     connections allowunconnected:
 }
-
-//network HandoverNetworkClusterB extends HandoverNetworkClusterB
-//{
-//    parameters:
-//}
-
