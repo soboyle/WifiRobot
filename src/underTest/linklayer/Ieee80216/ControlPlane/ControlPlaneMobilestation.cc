@@ -2050,6 +2050,8 @@ bool ControlPlaneMobilestation::isCorrectDLMAP(cMessage *msg)
             return true;
         }
     }
+    else
+    	return false;
 }
 
 void ControlPlaneMobilestation::sendData()
