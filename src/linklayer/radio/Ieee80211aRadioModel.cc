@@ -168,6 +168,8 @@ Ieee80211aRadioModel::~Ieee80211aRadioModel()
         if (IS_ERROR_MASK_GENERATED)
             fclose(error_masks);
     }
+    if (parseTable)
+    	delete parseTable;
 }
 
 void Ieee80211aRadioModel::initializeFrom(cModule *radioModule)

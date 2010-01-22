@@ -415,7 +415,7 @@ void Ieee80211gRadioModel::parseFile(const char *filename)
                       SnrBer snrdata2;
                       snrdata2.snr=snr;
                       snrdata2.ber=ber;
-                      l->snrlist.insert(l->snrlist.begin()+i,snrdata2);
+                      l->snrlist.insert(l->snrlist.begin()+j,snrdata2);
                       break;
                     }
                     else if (j+1==l->snrlist.size())
@@ -536,6 +536,8 @@ Ieee80211gRadioModel::~Ieee80211gRadioModel()
           delete p;
 
       }
+      if (parseTable)
+    	  delete parseTable;
 }
 
 
