@@ -4,7 +4,6 @@
 // Copyright (C) 2007 Roland Siedlaczek
 //
 
-
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -19,58 +18,52 @@
  * additional frames get queued up; see NED file for more info.
  */
 
-
-
-class ControlPlaneBaseAP: public cSimpleModule, public ControlPlaneAP
+class ControlPlaneBaseAP : public cSimpleModule, public ControlPlaneAP
 {
-
-
-public:
+  public:
 /**
 * @name FlowMaping
 *
 */
-struct FlowMap
-   {
-    MACAddress receiverAddress; // aka address1
-    MACAddress transmitterAddress; // aka address2
-    int ConnectID;
-    int ServiceFlowID;
-   };
+    struct FlowMap
+    {
+        MACAddress receiverAddress; // aka address1
+        MACAddress transmitterAddress; // aka address2
+        int ConnectID;
+        int ServiceFlowID;
+    };
 
+    /**
+    * @name MobileSubscribe
+    * Speicher Informationen über
+    * Speichert alle empfangenen MobileSubscriber
+    */
+    struct MSSInfo
+    {
+        int channel;            //Vrwendeter Kanalnummer
+        MACAddress MSS_Address; // MAC Adresse der Mobile Subscriber Station
+        cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
 
-
-/**
-* @name MobileSubscribe
-* Speicher Informationen über
-* Speichert alle empfangenen MobileSubscriber
-*/
-struct MSSInfo
-   {
-    int channel; //Vrwendeter Kanalnummer
-    MACAddress MSS_Address; // MAC Adresse der Mobile Subscriber Station
-    cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
-
-    MSSInfo()
-     {
-      channel=-1;
-      authTimeoutMsg=NULL;
-     }
-   };
+        MSSInfo()
+        {
+            channel = -1;
+            authTimeoutMsg = NULL;
+        }
+    };
 
     // APInfo list: we collect scanning results and keep track of ongoing authentications here
     // Note: there can be several ongoing authentications simultaneously
-    typedef std::list<MSSInfo> MobileSubscriberStationList;
+    typedef std::list<MSSInfo>MobileSubscriberStationList;
     MobileSubscriberStationList mssList;
 
-/**
-* @name Configuration parameters
-* Hier werden Parameter des Modules Basestation defeniert.
-*/
-protected:
+    /**
+    * @name Configuration parameters
+    * Hier werden Parameter des Modules Basestation defeniert.
+    */
+  protected:
     BaseStationInfo BSInfo;
 
-public:
+  public:
     cGate *gateToWatch;
 
     cQueue queue;
@@ -95,16 +88,15 @@ public:
     void sendLowerMessage(cMessage *msg);
     void sendLowerDelayMessage(double delayTime, cMessage *msg);
     void sendRadioUpOut(cMessage *msg);
+
   protected:
-
     void sendBroadcast();
-
 
     void handle_RNG_REQ_Frame(Ieee80216_RNG_REQ *frame);
     void handle_SBC_REQ_Frame(Ieee80216_SBC_REQ *frame);
     void handle_REG_REQ_Frame(Ieee80216_REG_REQ *frame);
 
     void clearMSSList();
-    void storeMSSInfo(const MACAddress& Address);
-    MSSInfo *lookupMSS(const MACAddress& Address);
+    void storeMSSInfo(const MACAddress &Address);
+    MSSInfo* lookupMSS(const MACAddress &Address);
 };

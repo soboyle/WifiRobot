@@ -19,12 +19,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "TrafGenPar.h"
 #include <string>
 
 //Define_Module(TrafGen);
-
 
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
@@ -35,73 +33,75 @@
 
 void TrafGenPar::initialize(int aStage)
 {
-	cSimpleModule::initialize(aStage);
+    cSimpleModule::initialize(aStage);
 
-	if(0 == aStage){
-		ev << "initializing TrafGen..." << endl;
+    if (0 == aStage)
+    {
+        ev << "initializing TrafGen..." << endl;
 
-		mpSendMessage           = new cMessage("SendMessage");
-		mpOnOffSwitch           = new cMessage("onOffSwitch");
+        mpSendMessage = new cMessage("SendMessage");
+        mpOnOffSwitch = new cMessage("onOffSwitch");
 
-		if (par("isSink"))
-		{
-			// no traffic is to be sent by this node
-			return;
-		}
+        if (par("isSink"))
+        {
+            // no traffic is to be sent by this node
+            return;
+        }
 
-		// read all the parameters from the xml file
-		if (FirstPacketTime() < 0)
-		{
-			// no traffic is to be sent by this node
-			return;
-		}
+        // read all the parameters from the xml file
+        if (FirstPacketTime() < 0)
+        {
+            // no traffic is to be sent by this node
+            return;
+        }
 
         // the onOff-traffic timer is scheduled
         // only if the parameters for onOff-traffic are present
-		if ((OnIntv() > 0) && (OffIntv() > 0))
-		{
-			scheduleAt(simTime() + OnIntv(), mpOnOffSwitch);
-			mOnOff = TRAFFIC_ON;
-		}
+        if ((OnIntv() > 0) && (OffIntv() > 0))
+        {
+            scheduleAt(simTime() + OnIntv(), mpOnOffSwitch);
+            mOnOff = TRAFFIC_ON;
+        }
 
-		// if the offInterArrivalTime attribute is present: packets are sent during the off interval too
-		if ((mOnOff == TRAFFIC_ON) && (OffInterDepartureTime()>0))
-		{
-			mOffTraffic = true;
-		}
-		else
-		{
-			mOffTraffic = false;
-		}
+        // if the offInterArrivalTime attribute is present: packets are sent during the off interval too
+        if ((mOnOff == TRAFFIC_ON) && (OffInterDepartureTime() > 0))
+        {
+            mOffTraffic = true;
+        }
+        else
+        {
+            mOffTraffic = false;
+        }
 
-		// if the onIdenticalTrafDest attribute is present: packets are
-		// sent to the same destination during on intervals
-		if (mOnOff == TRAFFIC_ON)
-		{
-			mOnIdenticalDest = par ("onIdenticalTrafDest");
-		}
-		else
-		{
-			mOnIdenticalDest = false;
-		}
+        // if the onIdenticalTrafDest attribute is present: packets are
+        // sent to the same destination during on intervals
+        if (mOnOff == TRAFFIC_ON)
+        {
+            mOnIdenticalDest = par("onIdenticalTrafDest");
+        }
+        else
+        {
+            mOnIdenticalDest = false;
+        }
 
-		mDestination = par("trafDest").stringValue();
-		if (mDestination == std::string("-1")){
-			mDestination = "BROADCAST"; // Broadcast
-		}
+        mDestination = par("trafDest").stringValue();
+        if (mDestination == std::string("-1"))
+        {
+            mDestination = "BROADCAST"; // Broadcast
+        }
 
-		if (mOnIdenticalDest)
-		{
-			mCurrentOnDest = calculateDestination();
-		}
+        if (mOnIdenticalDest)
+        {
+            mCurrentOnDest = calculateDestination();
+        }
 
-		if (FirstPacketTime() < 0)
-			error("TrafficGenerator, attribute firstPacketTime: time < 0 is not legal");
+        if (FirstPacketTime() < 0)
+            error("TrafficGenerator, attribute firstPacketTime: time < 0 is not legal");
 
-		scheduleAt(simTime() + FirstPacketTime(), mpSendMessage);
+        scheduleAt(simTime() + FirstPacketTime(), mpSendMessage);
 
-		WATCH(mOnOff);
-	}
+        WATCH(mOnOff);
+    }
 }
 
 /**
@@ -110,25 +110,25 @@ void TrafGenPar::initialize(int aStage)
  */
 void TrafGenPar::finish()
 {
-	cancelEvent(mpSendMessage);
-	delete mpSendMessage;
-	cancelEvent(mpOnOffSwitch);
-	delete mpOnOffSwitch;
+    cancelEvent(mpSendMessage);
+    delete mpSendMessage;
+    cancelEvent(mpOnOffSwitch);
+    delete mpOnOffSwitch;
 }
 
 //============================= OPERATIONS ===================================
 /**
  * Function called whenever a message arrives at the module
  */
-void TrafGenPar::handleMessage(cMessage* apMsg)
+void TrafGenPar::handleMessage(cMessage * apMsg)
 {
-	if (apMsg->isSelfMessage())
+    if (apMsg->isSelfMessage())
     {
-		handleSelfMsg(apMsg);
-	}
+        handleSelfMsg(apMsg);
+    }
     else
     {
-		handleLowerMsg(apMsg);
+        handleLowerMsg(apMsg);
     }
 }
 
@@ -162,27 +162,29 @@ long TrafGenPar::PacketSize()
     return par("packetSize").longValue();
 }
 
-double TrafGenPar::OnIntv(){
-	return par("onLength").doubleValue();
+double TrafGenPar::OnIntv()
+{
+    return par("onLength").doubleValue();
 }
 
 double TrafGenPar::OffIntv()
 {
-	return par("offLength").doubleValue();
+    return par("offLength").doubleValue();
 }
 
 double TrafGenPar::OffInterDepartureTime()
 {
-	return par("offInterDepartureTime").doubleValue();
+    return par("offInterDepartureTime").doubleValue();
 }
+
 /////////////////////////////// PROTECTED  ///////////////////////////////////
 
 //============================= OPERATIONS ===================================
 
-void TrafGenPar::handleLowerMsg(cMessage* apMsg)
+void TrafGenPar::handleLowerMsg(cMessage * apMsg)
 {
-	// only relevant for the sink
-	delete apMsg;
+    // only relevant for the sink
+    delete apMsg;
 }
 
 /**
@@ -192,68 +194,67 @@ void TrafGenPar::handleLowerMsg(cMessage* apMsg)
  * - mpSendMessage for sending a new message
  * @param pMsg a pointer to the just received message
  */
-void TrafGenPar::handleSelfMsg(cMessage* apMsg)
+void TrafGenPar::handleSelfMsg(cMessage * apMsg)
 {
-	// handle the switching between on and off periods of the generated traffic
-	// the values for offIntv, onIntv and interDepartureTime are evaluated each
+    // handle the switching between on and off periods of the generated traffic
+    // the values for offIntv, onIntv and interDepartureTime are evaluated each
     // time, in case a distribution function is specified
-	if (apMsg == mpOnOffSwitch)
+    if (apMsg == mpOnOffSwitch)
     {
-		if (mOnOff == TRAFFIC_ON)
+        if (mOnOff == TRAFFIC_ON)
         {
-			ev << "switch traffic off" << endl;
-			mOnOff = TRAFFIC_OFF;
-			scheduleAt(simTime() + OffIntv(), mpOnOffSwitch);
-			cancelEvent(mpSendMessage);
-			if (mOffTraffic)
-			{
-				scheduleAt(simTime() + OffInterDepartureTime(), mpSendMessage);
-			}
-		}
+            ev << "switch traffic off" << endl;
+            mOnOff = TRAFFIC_OFF;
+            scheduleAt(simTime() + OffIntv(), mpOnOffSwitch);
+            cancelEvent(mpSendMessage);
+            if (mOffTraffic)
+            {
+                scheduleAt(simTime() + OffInterDepartureTime(), mpSendMessage);
+            }
+        }
         else if (mOnOff == TRAFFIC_OFF)
         {
-			ev << "switch traffic on" << endl;
-			mOnOff = TRAFFIC_ON;
-			cancelEvent(mpSendMessage);
-			scheduleAt(simTime() + OnIntv(), mpOnOffSwitch);
-			scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
+            ev << "switch traffic on" << endl;
+            mOnOff = TRAFFIC_ON;
+            cancelEvent(mpSendMessage);
+            scheduleAt(simTime() + OnIntv(), mpOnOffSwitch);
+            scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
 
-			// if identical traffic destinations inside the on interval are
-			// required, calculate the destination now!
-			if (mOnIdenticalDest)
-			{
-				mCurrentOnDest = calculateDestination();
-			}
-		}
+            // if identical traffic destinations inside the on interval are
+            // required, calculate the destination now!
+            if (mOnIdenticalDest)
+            {
+                mCurrentOnDest = calculateDestination();
+            }
+        }
 
-
-	}
+    }
     // handle the sending of a new message
     else if (apMsg == mpSendMessage)
     {
-		cPacket* p_traffic_msg = new cPacket("TrafGen Message");
+        cPacket *p_traffic_msg = new cPacket("TrafGen Message");
 
-		// calculate the destination and send the message:
+        // calculate the destination and send the message:
 
-		if (mOnOff == TRAFFIC_ON && mOnIdenticalDest)
-		{
-			ev << "sending message to " << mCurrentOnDest.c_str() << endl;
-			SendTraf(p_traffic_msg, mCurrentOnDest.c_str());
-		}
-		else
-		{
-			std::string dest = calculateDestination();
-			ev << "sending message to " << dest.c_str() << endl;
-			SendTraf(p_traffic_msg, dest.c_str());
-		}
+        if (mOnOff == TRAFFIC_ON && mOnIdenticalDest)
+        {
+            ev << "sending message to " << mCurrentOnDest.c_str() << endl;
+            SendTraf(p_traffic_msg, mCurrentOnDest.c_str());
+        }
+        else
+        {
+            std::string dest = calculateDestination();
+            ev << "sending message to " << dest.c_str() << endl;
+            SendTraf(p_traffic_msg, dest.c_str());
+        }
 
-		// schedule next event
-		// interDepartureTime is evaluated each time,
+        // schedule next event
+        // interDepartureTime is evaluated each time,
         // in case a distribution function is specified
-		if (mOffTraffic && mOnOff == TRAFFIC_OFF)
-			scheduleAt(simTime() + OffInterDepartureTime(), mpSendMessage);
-		else
-			scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
+        if (mOffTraffic && mOnOff == TRAFFIC_OFF)
+            scheduleAt(simTime() + OffInterDepartureTime(), mpSendMessage);
+        else
+            scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
     }
 }
 
@@ -263,29 +264,27 @@ void TrafGenPar::handleSelfMsg(cMessage* apMsg)
  */
 std::string TrafGenPar::calculateDestination()
 {
-	if (mDestination.find_first_of('*') == std::string::npos)
-	{
-		// no asterisk in the destination, no calculation needed
-		return mDestination;
-	}
-	else
-	{
-		// asterisk present, find out how many hosts with the specified name
-		// there are and randomly (uniform) pick one
-		std::string s=mDestination;
-		int index = s.find_first_of('*');
-		s.replace(index, 1, "0");
-		int size = simulation.getModuleByPath(s.c_str())->size();
-		s = s.substr(0,index-1);
-		size = intuniform(0,size-1);
-		std::string dest(s);
-		dest.append("[");
-		char temp[10];
-		sprintf(temp, "%i", size);
-		dest.append(temp);
-		dest.append("]");
-		return dest;
-	}
+    if (mDestination.find_first_of('*') == std::string::npos)
+    {
+        // no asterisk in the destination, no calculation needed
+        return mDestination;
+    }
+    else
+    {
+        // asterisk present, find out how many hosts with the specified name
+        // there are and randomly (uniform) pick one
+        std::string s = mDestination;
+        int index = s.find_first_of('*');
+        s.replace(index, 1, "0");
+        int size = simulation.getModuleByPath(s.c_str())->size();
+        s = s.substr(0, index - 1);
+        size = intuniform(0, size - 1);
+        std::string dest(s);
+        dest.append("[");
+        char temp[10];
+        sprintf(temp, "%i", size);
+        dest.append(temp);
+        dest.append("]");
+        return dest;
+    }
 }
-
-

@@ -14,17 +14,14 @@
 
 class ControlPlaneAP
 {
-public:
-
-struct BaseStationInfo
-   {
-
-    MACAddress BasestationID; //Basestation ID
-    simtime_t DLMAP_interval; // Intervall der DL-MAP Nachricht
-    int DownlinkChannel;
-    int UplinkChannel;
-
-   };
+  public:
+    struct BaseStationInfo
+    {
+        MACAddress BasestationID; //Basestation ID
+        simtime_t DLMAP_interval; // Intervall der DL-MAP Nachricht
+        int DownlinkChannel;
+        int UplinkChannel;
+    };
 
     virtual void sendLowerMessage(cMessage *msg) = 0;
     virtual void sendLowerDelayMessage(double delayTime, cMessage *msg) = 0;

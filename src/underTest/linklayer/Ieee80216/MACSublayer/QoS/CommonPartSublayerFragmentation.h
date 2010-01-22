@@ -8,20 +8,19 @@
 class CommonPartSublayerFragmentation : public cSimpleModule
 {
   private:
-    int commonPartGateOut, commonPartGateIn,
-    	securityGateIn, securityGateOut,
-    	schedulingGateIn;
-    	
-    
+    int commonPartGateOut;
+    int commonPartGateIn;
+    int securityGateIn;
+    int securityGateOut;
+    int schedulingGateIn;
+
   public:
-	  CommonPartSublayerFragmentation();
+    CommonPartSublayerFragmentation();
     virtual ~CommonPartSublayerFragmentation();
-    
+
   protected:
     void initialize();
     void handleMessage(cMessage *msg);
-    void handleUpperMessage( cMessage *msg );
-    void handleSelfMessage( cMessage *msg );
+    void handleUpperMessage(cMessage *msg);
+    void handleSelfMessage(cMessage *msg);
 };
-
-

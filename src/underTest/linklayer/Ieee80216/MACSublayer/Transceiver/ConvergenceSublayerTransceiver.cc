@@ -16,22 +16,16 @@ ConvergenceSublayerTransceiver::~ConvergenceSublayerTransceiver()
 
 void ConvergenceSublayerTransceiver::initialize()
 {
-	higherLayerGateIn = findGate("higherLayerGateIn");
-	commonPartGateOut = findGate("commonPartGateOut");
-
+    higherLayerGateIn = findGate("higherLayerGateIn");
+    commonPartGateOut = findGate("commonPartGateOut");
 }
 
 void ConvergenceSublayerTransceiver::handleMessage(cMessage *msg)
 {
     if (msg->arrivedOn(higherLayerGateIn))
     {
-    	EV << "\n\nMessage arrived on ConvergenceSublayerTransceiver! ==> " << msg;
-    	EV << "Forwarding...";
-    	send(msg,"commonPartGateOut");
+        EV << "\n\nMessage arrived on ConvergenceSublayerTransceiver! ==> " << msg;
+        EV << "Forwarding...";
+        send(msg, "commonPartGateOut");
     }
-
 }
-
-
-
-

@@ -25,7 +25,6 @@
 
 //Define_Module(TrafGen);
 
-
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
 //============================= LIFECYCLE ===================================
@@ -34,103 +33,109 @@
  */
 void TrafGen::initialize(int aStage)
 {
-	cSimpleModule::initialize(aStage);
+    cSimpleModule::initialize(aStage);
 
-	if(0 == aStage){
-		ev << "initializing TrafGen..." << endl;
+    if (0 == aStage)
+    {
+        ev << "initializing TrafGen..." << endl;
 
-		mpSendMessage           = new cMessage("SendMessage");
-		mpOnOffSwitch           = new cMessage("onOffSwitch");
+        mpSendMessage = new cMessage("SendMessage");
+        mpOnOffSwitch = new cMessage("onOffSwitch");
 
-		mDefaultTrafConfigId    = par("defaultTrafConfigId");
+        mDefaultTrafConfigId = par("defaultTrafConfigId");
 
-		if (mDefaultTrafConfigId == -1)
-		{
-			// no traffic is to be sent by this node
-			return;
-		}
+        if (mDefaultTrafConfigId == -1)
+        {
+            // no traffic is to be sent by this node
+            return;
+        }
 
-		char id[5];
-		sprintf(id, "%d", mDefaultTrafConfigId);
+        char id[5];
+        sprintf(id, "%d", mDefaultTrafConfigId);
 
-		// read all the parameters from the xml file
-		cXMLElement* rootelement = par("trafConfig").xmlValue();
+        // read all the parameters from the xml file
+        cXMLElement* rootelement = par("trafConfig").xmlValue();
 
-		try {
-			mPacketSize.parse(rootelement->getElementById(id)->getAttribute("packetSize"));
-			mInterDepartureTime.parse(rootelement->getElementById(id)->getAttribute("interDepartureTime"));
-			mFirstPacketTime.parse(rootelement->getElementById(id)->getAttribute("firstPacketTime"));
-			if (mFirstPacketTime.longValue(this) == -1)
-			{
-				// no traffic is to be sent by this node
-				return;
-			}
+        try
+        {
+            mPacketSize.parse(rootelement->getElementById(id)->getAttribute("packetSize"));
+            mInterDepartureTime.parse(rootelement->getElementById(id)->getAttribute("interDepartureTime"));
+            mFirstPacketTime.parse(rootelement->getElementById(id)->getAttribute("firstPacketTime"));
+            if (mFirstPacketTime.longValue(this) == -1)
+            {
+                // no traffic is to be sent by this node
+                return;
+            }
 
-			// the onOff-traffic timer is scheduled
-			// only if the parameters for onOff-traffic are present
-			if (rootelement->getElementById(id)->getAttribute("onLength") != NULL)
-			{
-				mOnIntv.parse(rootelement->getElementById(id)->getAttribute("onLength"));
-				mOffIntv.parse(rootelement->getElementById(id)->getAttribute("offLength"));
-				if (mOnIntv.doubleValue(this) < 0)
-					error("TrafficGenerator, attribute onLength: interval length < 0 is not legal");
-				if (mOffIntv.doubleValue(this) < 0)
-					error("TrafficGenerator, attribute offLength: interval length < 0 is not legal");
+            // the onOff-traffic timer is scheduled
+            // only if the parameters for onOff-traffic are present
+            if (rootelement->getElementById(id)->getAttribute("onLength") != NULL)
+            {
+                mOnIntv.parse(rootelement->getElementById(id)->getAttribute("onLength"));
+                mOffIntv.parse(rootelement->getElementById(id)->getAttribute("offLength"));
+                if (mOnIntv.doubleValue(this) < 0)
+                    error("TrafficGenerator, attribute onLength: interval length < 0 is not legal");
+                if (mOffIntv.doubleValue(this) < 0)
+                    error("TrafficGenerator, attribute offLength: interval length < 0 is not legal");
 
-				scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
-				mOnOff = TRAFFIC_ON;
-			}
+                scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
+                mOnOff = TRAFFIC_ON;
+            }
 
-			// if the offInterArrivalTime attribute is present: packets are sent during the off interval too
-			if (mOnOff == TRAFFIC_ON && rootelement->getElementById(id)->getAttribute("offInterDepartureTime") != NULL)
-			{
-				mOffTraffic = true;
-				mOffInterDepartureTime.parse(rootelement->getElementById(id)->getAttribute("offInterDepartureTime"));
-			}
-			else
-			{
-				mOffTraffic = false;
-			}
+            // if the offInterArrivalTime attribute is present: packets are sent during the off interval too
+            if (mOnOff == TRAFFIC_ON
+                && rootelement->getElementById(id)->getAttribute("offInterDepartureTime") != NULL)
+            {
+                mOffTraffic = true;
+                mOffInterDepartureTime.parse(rootelement->getElementById(id)->
+                                             getAttribute("offInterDepartureTime"));
+            }
+            else
+            {
+                mOffTraffic = false;
+            }
 
-		}
-		catch (std::runtime_error e) {
-			error((std::string("error reading parameters from xml file: ") + e.what()).c_str());
-		}
+        }
+        catch(std::runtime_error e)
+        {
+            error((std::string("error reading parameters from xml file: ") + e.what()).c_str());
+        }
 
-		// if the onIdenticalTrafDest attribute is present: packets are
-		// sent to the same destination during on intervals
-		if (mOnOff == TRAFFIC_ON && rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest") != NULL)
-		{
-			cMsgPar temp;
-			if (!temp.parse(rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest")))
-			{
-				error("wrong value in xml file, attribute onIdenticalTrafDest");
-			}
-			mOnIdenticalDest = temp.boolValue();
-		}
-		else
-		{
-			mOnIdenticalDest = false;
-		}
+        // if the onIdenticalTrafDest attribute is present: packets are
+        // sent to the same destination during on intervals
+        if (mOnOff == TRAFFIC_ON
+            && rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest") != NULL)
+        {
+            cMsgPar temp;
+            if (!temp.parse(rootelement->getElementById(id)->getAttribute("onIdenticalTrafDest")))
+            {
+                error("wrong value in xml file, attribute onIdenticalTrafDest");
+            }
+            mOnIdenticalDest = temp.boolValue();
+        }
+        else
+        {
+            mOnIdenticalDest = false;
+        }
 
-		mDestination = rootelement->getElementById(id)->getAttribute("trafDest");
-		if (mDestination == std::string("-1"))
-		{
-			mDestination = "BROADCAST"; // Broadcast
-		}
+        mDestination = rootelement->getElementById(id)->getAttribute("trafDest");
+        if (mDestination == std::string("-1"))
+        {
+            mDestination = "BROADCAST"; // Broadcast
+        }
 
-		if (mOnIdenticalDest)
-		{
-			mCurrentOnDest = calculateDestination();
-		}
+        if (mOnIdenticalDest)
+        {
+            mCurrentOnDest = calculateDestination();
+        }
 
-		if (mFirstPacketTime.doubleValue(this) < 0)
-			error("TrafficGenerator, attribute firstPacketTime: time < 0 is not legal");
+        if (mFirstPacketTime.doubleValue(this) < 0)
+            error("TrafficGenerator, attribute firstPacketTime: time < 0 is not legal");
 
-		scheduleAt(simTime() + mFirstPacketTime.doubleValue(this), mpSendMessage);
+        scheduleAt(simTime() + mFirstPacketTime.doubleValue(this), mpSendMessage);
 
-		WATCH(mOnOff);
-	}
+        WATCH(mOnOff);
+    }
 }
 
 /**
@@ -139,10 +144,10 @@ void TrafGen::initialize(int aStage)
  */
 void TrafGen::finish()
 {
-	cancelEvent(mpSendMessage);
-	delete mpSendMessage;
-	cancelEvent(mpOnOffSwitch);
-	delete mpOnOffSwitch;
+    cancelEvent(mpSendMessage);
+    delete mpSendMessage;
+    cancelEvent(mpOnOffSwitch);
+    delete mpOnOffSwitch;
 }
 
 //============================= OPERATIONS ===================================
@@ -151,14 +156,14 @@ void TrafGen::finish()
  */
 void TrafGen::handleMessage(cMessage* apMsg)
 {
-	if (apMsg->isSelfMessage())
-	{
-		handleSelfMsg(apMsg);
-	}
-	else
-	{
-		handleLowerMsg(check_and_cast<cPacket*>(apMsg));
-	}
+    if (apMsg->isSelfMessage())
+    {
+        handleSelfMsg(apMsg);
+    }
+    else
+    {
+        handleLowerMsg(check_and_cast<cPacket*>(apMsg));
+    }
 }
 
 /**
@@ -197,8 +202,8 @@ long TrafGen::PacketSize()
 
 void TrafGen::handleLowerMsg(cPacket* apMsg)
 {
-	// only relevant for the sink
-	delete apMsg;
+    // only relevant for the sink
+    delete apMsg;
 }
 
 /**
@@ -210,67 +215,65 @@ void TrafGen::handleLowerMsg(cPacket* apMsg)
  */
 void TrafGen::handleSelfMsg(cMessage* apMsg)
 {
-	// handle the switching between on and off periods of the generated traffic
-	// the values for offIntv, onIntv and interDepartureTime are evaluated each
-	// time, in case a distribution function is specified
-	if (apMsg == mpOnOffSwitch)
-	{
-		if (mOnOff == TRAFFIC_ON)
-		{
-			ev << "switch traffic off" << endl;
-			mOnOff = TRAFFIC_OFF;
-			scheduleAt(simTime() + mOffIntv.doubleValue(this), mpOnOffSwitch);
-			cancelEvent(mpSendMessage);
-			if (mOffTraffic)
-			{
-				scheduleAt(simTime() + mOffInterDepartureTime.doubleValue(this), mpSendMessage);
-			}
-		}
-		else if (mOnOff == TRAFFIC_OFF)
-		{
-			ev << "switch traffic on" << endl;
-			mOnOff = TRAFFIC_ON;
-			cancelEvent(mpSendMessage);
-			scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
-			scheduleAt(simTime() + mInterDepartureTime.doubleValue(this), mpSendMessage);
+    // handle the switching between on and off periods of the generated traffic
+    // the values for offIntv, onIntv and interDepartureTime are evaluated each
+    // time, in case a distribution function is specified
+    if (apMsg == mpOnOffSwitch)
+    {
+        if (mOnOff == TRAFFIC_ON)
+        {
+            ev << "switch traffic off" << endl;
+            mOnOff = TRAFFIC_OFF;
+            scheduleAt(simTime() + mOffIntv.doubleValue(this), mpOnOffSwitch);
+            cancelEvent(mpSendMessage);
+            if (mOffTraffic)
+            {
+                scheduleAt(simTime() + mOffInterDepartureTime.doubleValue(this), mpSendMessage);
+            }
+        }
+        else if (mOnOff == TRAFFIC_OFF)
+        {
+            ev << "switch traffic on" << endl;
+            mOnOff = TRAFFIC_ON;
+            cancelEvent(mpSendMessage);
+            scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
+            scheduleAt(simTime() + mInterDepartureTime.doubleValue(this), mpSendMessage);
 
-			// if identical traffic destinations inside the on interval are
-			// required, calculate the destination now!
-			if (mOnIdenticalDest)
-			{
-				mCurrentOnDest = calculateDestination();
-			}
-		}
+            // if identical traffic destinations inside the on interval are
+            // required, calculate the destination now!
+            if (mOnIdenticalDest)
+            {
+                mCurrentOnDest = calculateDestination();
+            }
+        }
+    }
+    // handle the sending of a new message
+    else if (apMsg == mpSendMessage)
+    {
+        cPacket* p_traffic_msg = new cPacket("TrafGen Message");
 
+        // calculate the destination and send the message:
 
-	}
-	// handle the sending of a new message
-	else if (apMsg == mpSendMessage)
-	{
-		cPacket* p_traffic_msg = new cPacket("TrafGen Message");
+        if (mOnOff == TRAFFIC_ON && mOnIdenticalDest)
+        {
+            ev << "sending message to " << mCurrentOnDest.c_str() << endl;
+            SendTraf(p_traffic_msg, mCurrentOnDest.c_str());
+        }
+        else
+        {
+            std::string dest = calculateDestination();
+            ev << "sending message to " << dest.c_str() << endl;
+            SendTraf(p_traffic_msg, dest.c_str());
+        }
 
-		// calculate the destination and send the message:
-
-		if (mOnOff == TRAFFIC_ON && mOnIdenticalDest)
-		{
-			ev << "sending message to " << mCurrentOnDest.c_str() << endl;
-			SendTraf(p_traffic_msg, mCurrentOnDest.c_str());
-		}
-		else
-		{
-			std::string dest = calculateDestination();
-			ev << "sending message to " << dest.c_str() << endl;
-			SendTraf(p_traffic_msg, dest.c_str());
-		}
-
-		// schedule next event
-		// interDepartureTime is evaluated each time,
-		// in case a distribution function is specified
-		if (mOffTraffic && mOnOff == TRAFFIC_OFF)
-			scheduleAt(simTime() + mOffInterDepartureTime.doubleValue(this), mpSendMessage);
-		else
-			scheduleAt(simTime() + mInterDepartureTime.doubleValue(this), mpSendMessage);
-	}
+        // schedule next event
+        // interDepartureTime is evaluated each time,
+        // in case a distribution function is specified
+        if (mOffTraffic && mOnOff == TRAFFIC_OFF)
+            scheduleAt(simTime() + mOffInterDepartureTime.doubleValue(this), mpSendMessage);
+        else
+            scheduleAt(simTime() + mInterDepartureTime.doubleValue(this), mpSendMessage);
+    }
 }
 
 /**
@@ -279,30 +282,29 @@ void TrafGen::handleSelfMsg(cMessage* apMsg)
  */
 std::string TrafGen::calculateDestination()
 {
-
-	if (mDestination.find_first_of('*') == std::string::npos)
-	{
-		// no asterisk in the destination, no calculation needed
-		return mDestination;
-	}
-	else
-	{
-		// asterisk present, find out how many hosts with the specified name
-		// there are and randomly (uniform) pick one
-		std::string s = mDestination;
-		int index = s.find_first_of('*');
-		s.replace(index, 1, "0");
-		int size = simulation.getModuleByPath(s.c_str())->size();
-		s = s.substr(0,index-1);
-		size = intuniform(0,size-1);
-		std::string dest(s);
-		dest.append("[");
-		char temp[10];
-		sprintf(temp, "%i", size);
-		dest.append(temp);
-		dest.append("]");
-		return dest;
-	}
+    if (mDestination.find_first_of('*') == std::string::npos)
+    {
+        // no asterisk in the destination, no calculation needed
+        return mDestination;
+    }
+    else
+    {
+        // asterisk present, find out how many hosts with the specified name
+        // there are and randomly (uniform) pick one
+        std::string s = mDestination;
+        int index = s.find_first_of('*');
+        s.replace(index, 1, "0");
+        int size = simulation.getModuleByPath(s.c_str())->size();
+        s = s.substr(0, index - 1);
+        size = intuniform(0, size - 1);
+        std::string dest(s);
+        dest.append("[");
+        char temp[10];
+        sprintf(temp, "%i", size);
+        dest.append(temp);
+        dest.append("]");
+        return dest;
+    }
 }
 
 /**
@@ -314,79 +316,79 @@ std::string TrafGen::calculateDestination()
  */
 void TrafGen::setParams(int aNewTrafficPattern)
 {
+    cXMLElement* rootelement = par("trafConfig").xmlValue();
+    char buf[4];
+    sprintf(buf, "%d", aNewTrafficPattern);
+    try
+    {
+        mPacketSize.parse(rootelement->getElementById(buf)->getAttribute("packetSize"));
+        mInterDepartureTime.parse(rootelement->getElementById(buf)->getAttribute("interDepartureTime"));
+        mFirstPacketTime.parse(rootelement->getElementById(buf)->getAttribute("firstPacketTime"));
+        if (rootelement->getElementById(buf)->getAttribute("onLength") != NULL)
+        {
+            mOnIntv.parse(rootelement->getElementById(buf)->getAttribute("onLength"));
+            mOnIntv.parse(rootelement->getElementById(buf)->getAttribute("offLength"));
+            cancelEvent(mpOnOffSwitch);
+            scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
+            mOnOff = TRAFFIC_ON;
+        }
+        else
+        {
+            cancelEvent(mpOnOffSwitch);
+        }
 
-	cXMLElement *rootelement = par("trafConfig").xmlValue();
-	char buf[4];
-	sprintf(buf, "%d", aNewTrafficPattern);
-	try {
-		mPacketSize.parse(rootelement->getElementById(buf)->getAttribute("packetSize"));
-		mInterDepartureTime.parse(rootelement->getElementById(buf)->getAttribute("interDepartureTime"));
-		mFirstPacketTime.parse(rootelement->getElementById(buf)->getAttribute("firstPacketTime"));
-		if (rootelement->getElementById(buf)->getAttribute("onLength") != NULL)
-		{
-			mOnIntv.parse(rootelement->getElementById(buf)->getAttribute("onLength"));
-			mOnIntv.parse(rootelement->getElementById(buf)->getAttribute("offLength"));
-			cancelEvent(mpOnOffSwitch);
-			scheduleAt(simTime() + mOnIntv.doubleValue(this), mpOnOffSwitch);
-			mOnOff = TRAFFIC_ON;
-		}
-		else
-		{
-			cancelEvent(mpOnOffSwitch);
-		}
+        // if the offInterArrivalTime attribute is present: packets are sent during the off interval too
+        if (mOnOff == TRAFFIC_ON
+            && rootelement->getElementById(buf)->getAttribute("offInterDepartureTime") != NULL)
+        {
+            mOffTraffic = true;
+            mOffInterDepartureTime.parse(rootelement->getElementById(buf)->
+                                         getAttribute("offInterDepartureTime"));
+        }
+        else
+        {
+            mOffTraffic = false;
+        }
 
-		// if the offInterArrivalTime attribute is present: packets are sent during the off interval too
-		if (mOnOff == TRAFFIC_ON && rootelement->getElementById(buf)->getAttribute("offInterDepartureTime") != NULL)
-		{
-			mOffTraffic = true;
-			mOffInterDepartureTime.parse(rootelement->getElementById(buf)->getAttribute("offInterDepartureTime"));
-		}
-		else
-		{
-			mOffTraffic = false;
-		}
+        // if the onIdenticalTrafDest attribute is present: packets are
+        // sent to the same destination during on intervals
+        if (mOnOff == TRAFFIC_ON
+            && rootelement->getElementById(buf)->getAttribute("onIdenticalTrafDest") != NULL)
+        {
+            cMsgPar temp;
+            temp.parse(rootelement->getElementById(buf)->getAttribute("onIdenticalTrafDest"));
+            mOnIdenticalDest = temp.boolValue();
+        }
+        else
+        {
+            mOnIdenticalDest = false;
+        }
+    }
+    catch(std::runtime_error e)
+    {
+        error((std::string("error reading parameters from xml file: ") + e.what()).c_str());
+    }
 
-		// if the onIdenticalTrafDest attribute is present: packets are
-		// sent to the same destination during on intervals
-		if (mOnOff == TRAFFIC_ON && rootelement->getElementById(buf)->getAttribute("onIdenticalTrafDest") != NULL)
-		{
-			cMsgPar temp;
-			temp.parse(rootelement->getElementById(buf)->getAttribute("onIdenticalTrafDest"));
-			mOnIdenticalDest = temp.boolValue();
-		}
-		else
-		{
-			mOnIdenticalDest = false;
-		}
-	}
-	catch (std::runtime_error e) {
-		error((std::string("error reading parameters from xml file: ") + e.what()).c_str());
-	}
+    mDestination = rootelement->getElementById(buf)->getAttribute("trafDest");
+    if (mDestination == std::string("-1"))
+    {
+        mDestination = "BROADCAST"; // Broadcast
+    }
 
+    if (mOnIdenticalDest)
+    {
+        mCurrentOnDest = calculateDestination();
+    }
 
-	mDestination = rootelement->getElementById(buf)->getAttribute("trafDest");
-	if (mDestination == std::string("-1"))
-	{
-		mDestination = "BROADCAST"; // Broadcast
-	}
-
-	if (mOnIdenticalDest)
-	{
-		mCurrentOnDest = calculateDestination();
-	}
-
-
-	// reschedule the send message timer
-	if (simTime() != 0)
-	{
-		cancelEvent(mpSendMessage);
-		scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
-	}
-	else
-	{
-		cancelEvent(mpSendMessage);
-		scheduleAt(simTime() + FirstPacketTime(), mpSendMessage);
-	}
-
+    // reschedule the send message timer
+    if (simTime() != 0)
+    {
+        cancelEvent(mpSendMessage);
+        scheduleAt(simTime() + InterDepartureTime(), mpSendMessage);
+    }
+    else
+    {
+        cancelEvent(mpSendMessage);
+        scheduleAt(simTime() + FirstPacketTime(), mpSendMessage);
+    }
 }
-

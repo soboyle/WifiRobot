@@ -70,52 +70,48 @@ Nodes sending no traffic can be achieved by two methods:
 
 class TrafGenPar : public cSimpleModule
 {
-
-public:
+  public:
     // LIFECYCLE
     // this takes care of constructors and destructors
-	//Module_Class_Members(TrafGen, cSimpleModule, 0);
-	virtual void initialize(int);
-	virtual void finish();
+    //Module_Class_Members(TrafGen, cSimpleModule, 0);
+    virtual void initialize(int);
+    virtual void finish();
 
     // OPERATIONS
-	virtual void handleMessage(cMessage*);
-    double  FirstPacketTime();
-    double  InterDepartureTime();
-    long    PacketSize();
+    virtual void handleMessage(cMessage*);
+    double FirstPacketTime();
+    double InterDepartureTime();
+    long PacketSize();
     double OnIntv();
 
     double OffIntv();
     double OffInterDepartureTime();
 
-	enum TrafficStateType
-    {
+    enum TrafficStateType {
         TRAFFIC_ON,
         TRAFFIC_OFF
     };
 
-protected:
+  protected:
 
     // OPERATIONS
-	virtual void handleSelfMsg(cMessage*);
-	virtual void handleLowerMsg(cMessage*);
+    virtual void handleSelfMsg(cMessage*);
+    virtual void handleLowerMsg(cMessage*);
 
-	virtual void SendTraf(cPacket*, const char*) = 0;
-  	std::string calculateDestination();
+    virtual void SendTraf(cPacket*, const char*) = 0;
+    std::string calculateDestination();
 
-private:
+  private:
+    // MEMBER VARIABLES
+    bool mOffTraffic;
+    bool mOnIdenticalDest;
+    bool mOnOff;
+    std::string mDestination;
 
-	// MEMBER VARIABLES
-	bool		mOffTraffic;
-	bool		mOnIdenticalDest;
-	bool        mOnOff;
-	std::string      mDestination;
+    std::string mCurrentOnDest;
 
-	std::string	mCurrentOnDest;
-
-	cMessage*   mpSendMessage;
-	cMessage*   mpOnOffSwitch;
-
+    cMessage *mpSendMessage;
+    cMessage *mpOnOffSwitch;
 };
 
 #endif

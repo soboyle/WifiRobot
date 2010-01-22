@@ -1,5 +1,4 @@
 
-
 #ifndef IEEE80216RADIOMODEL_H
 #define IEEE80216RADIOMODEL_H
 
@@ -16,11 +15,9 @@ class INET_API Ieee80216RadioModel : public IRadioModel
     double snirThreshold;
 
   public:
-    virtual void initializeFrom(cModule *radioModule);
-
-    virtual double calculateDuration(AirFrame *airframe);
-
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
+    virtual void initializeFrom(cModule* radioModule);
+    virtual double calculateDuration(AirFrame* airframe);
+    virtual bool isReceivedCorrectly(AirFrame* airframe, const SnrList& receivedList);
 
   protected:
     // utility
@@ -30,4 +27,3 @@ class INET_API Ieee80216RadioModel : public IRadioModel
 };
 
 #endif
-

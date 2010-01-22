@@ -17,28 +17,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "Ieee80216RadioModel.h"
 #include "Ieee80211Consts.h"
 #include "FWMath.h"
 
-
 Register_Class(Ieee80216RadioModel);
 
-
-void Ieee80216RadioModel::initializeFrom(cModule *radioModule)
+void Ieee80216RadioModel::initializeFrom(cModule* radioModule)
 {
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
 }
 
-double Ieee80216RadioModel::calculateDuration(AirFrame *airframe)
+double Ieee80216RadioModel::calculateDuration(AirFrame* airframe)
 {
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-    return airframe->getByteLength()/airframe->getBitrate();// + PHY_HEADER_LENGTH/BITRATE_HEADER;
+    return airframe->getByteLength() / airframe->getBitrate(); // + PHY_HEADER_LENGTH/BITRATE_HEADER;
 }
 
-
-bool Ieee80216RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+bool Ieee80216RadioModel::isReceivedCorrectly(AirFrame* airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -47,7 +43,8 @@ bool Ieee80216RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
             snirMin = iter->snr;
 
     cMessage *frame = airframe->getEncapsulatedMsg();
-    EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
+    EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() <<
+        ") snrMin=" << snirMin << endl;
 
     if (snirMin <= snirThreshold)
     {
@@ -66,7 +63,6 @@ bool Ieee80216RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         return false;
     }
 }
-
 
 bool Ieee80216RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
@@ -105,16 +101,14 @@ bool Ieee80216RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     double rand = dblrand();
 
     if (rand > headerNoError)
-        return false; // error in header
+        return false;           // error in header
     else if (dblrand() > MpduNoError)
-        return false;  // error in MPDU
+        return false;           // error in MPDU
     else
-        return true; // no error
+        return true;            // no error
 }
 
 double Ieee80216RadioModel::dB2fraction(double dB)
 {
     return pow(10.0, (dB / 10));
 }
-
-

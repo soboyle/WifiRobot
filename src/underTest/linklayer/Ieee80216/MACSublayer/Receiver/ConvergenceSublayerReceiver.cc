@@ -17,24 +17,20 @@ ConvergenceSublayerReceiver::~ConvergenceSublayerReceiver()
 void ConvergenceSublayerReceiver::initialize()
 {
     commonPartGateIn = findGate("commonPartGateIn");
-    higherLayerGateOut  = findGate("higherLayerGateOut");
+    higherLayerGateOut = findGate("higherLayerGateOut");
 }
 
 void ConvergenceSublayerReceiver::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGateId() == commonPartGateIn)
     {
-    	EV << "\n\nMessage arrived on ConvergenceSublayerUp! ==> " << msg;
+        EV << "\n\nMessage arrived on ConvergenceSublayerUp! ==> " << msg;
 
-    	EV << "\nSuddenly, a black hole forwarded the message to another universe.";
-    	send(msg, higherLayerGateOut);
+        EV << "\nSuddenly, a black hole forwarded the message to another universe.";
+        send(msg, higherLayerGateOut);
     }
     else
     {
-    	EV << "nothing" << endl;
+        EV << "nothing" << endl;
     }
 }
-
-
-
-

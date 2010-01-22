@@ -10,7 +10,6 @@
 
 
 cplusplus {{
-
 #include "MACAddress.h"
 #include "Ieee80216MacHeader_m.h"
 #include "global_enums.h"
@@ -18,19 +17,13 @@ cplusplus {{
 #include "Struct.h"//Type/Length/Value TLV coding
 }}
 
-
-
 class noncobject MACAddress;
 
-
 message Ieee80216GenericMacHeader;
-
-
 
 //Management-Nachrichten definition gemaess Standard
 enum Ieee80216ManagementType
 {
-
     ST_UCD = 0x00;
     ST_DCD = 0x01;
     ST_DL_MAP = 0x02;
@@ -46,7 +39,6 @@ enum Ieee80216ManagementType
     ST_MSHO_REQ = 0x57;
     ST_BSHO_RSP = 0x58;
     ST_MOB_HO_IND = 0x59;
-
 
     ST_DSA_REQ = 0x0B;
     ST_DSA_RSP = 0x0C;
@@ -67,39 +59,25 @@ enum Ieee80216ManagementType
     ST_SBC_RSP = 0x1B;
 }
 
-
 struct TLV_LEN8;
-
 
 struct TLV_LEN9;
 
-
 struct TLV_LEN13;
-
 
 struct TLV_LEN16;
 
-
 struct TLV_LEN24;
-
 
 struct TLV_LEN32;
 
-
 struct TLV_LEN40;
-
 
 struct TLV_LEN48;
 
-
-
 struct ServiceFlow;
 
-
 enum ip_traffic_types;
-
-
-
 
 packet Ieee80216_Preambel
 {
@@ -112,9 +90,7 @@ packet Ieee80216_Preambel
 packet Ieee80216ManagementFrame extends Ieee80216GenericMacHeader
 {
     short Management_Message_Type enum(Ieee80216ManagementType);
-
 }
-
 
 //
 // DL-MAP-IE Frmat aus der Tabele 275 im 802.16e Standard für OFDMA
@@ -123,35 +99,34 @@ packet Ieee80216DL_MAP_IE
 {
     int bitlength = 62;
 
-    short DIUC;							//  4 bits
-    short N_CID;							//  8 bits table 276
-    int CID;							// 16 bits
-    short OFDMA_Symbol_offset;			//  8 bits 
-    short Subchannel_offset;				//  8 bits
-    short Boosting;						//  3 bits
-    short No_OFDMA_Symbols;				//  7 bits
-    short No_Subchannels;				//  6 bits
-    short Repetition_Coding_Indication;	//  2 bits
+    short DIUC;                                 //  4 bits
+    short N_CID;                                //  8 bits table 276
+    int CID;                                    // 16 bits
+    short OFDMA_Symbol_offset;                  //  8 bits
+    short Subchannel_offset;                    //  8 bits
+    short Boosting;                             //  3 bits
+    short No_OFDMA_Symbols;                     //  7 bits
+    short No_Subchannels;                       //  6 bits
+    short Repetition_Coding_Indication;         //  2 bits
 
     double StartTime_Offset;
 }
+
 //DL-MAP Format aus der Tabele 16 im 802.16e Standard
 packet Ieee80216DL_MAP extends Ieee80216ManagementFrame
 {
     CID = 0xFFFF;//Broadcast Frame
 
     //table 16
-    Management_Message_Type = ST_DL_MAP;	// 8 Bit
-    short DCD_Count;					// 8 bit
-    MACAddress BS_ID;					//48 bit
-    int No_OFDMA_Symbols;				//8 Bit
+    Management_Message_Type = ST_DL_MAP;        // 8 Bit
+    short DCD_Count;                            // 8 bit
+    MACAddress BS_ID;                           //48 bit
+    int No_OFDMA_Symbols;                       //8 Bit
     Ieee80216DL_MAP_IE dlmap_ie_List[]; // array for DL-MapIE
 
-
-
     //table 273
-    int Frame_duration_code;			// 8 Bit
-    double Frame_number;				// 24 Bit
+    int Frame_duration_code;                    // 8 Bit
+    double Frame_number;                        // 24 Bit
 }
 
 //UL-MAP-IE Format aus der Tabele 287 im 802.16e Standard für OFDMA
@@ -159,24 +134,24 @@ packet Ieee80216UL_MAP_IE
 {
     int bitlength = 32;
 
-    //table 287	
+    //table 287
     int CID; // 16 bits
     int uiuc; // 4Bits table 288
 
     //if uiuc = 12
-    //int symbol_Offset;				// 8Bits
-    int OFDMA_Symbol_offset;			//8 Bit
-    int Subchannel_offset;			//7 Bit
-    int No_OFDMA_Symbols; 			//7 Bit
-    int No_Subchannels;				// 7 Bit
-    int Ranging_Method; 				// 2 Bit
-    double Duration;					//	10 Bit see 8.4.3.1 for simulation: in milliseconds  (originally in #OFDM-Symbols)
+    //int symbol_Offset;                // 8Bits
+    int OFDMA_Symbol_offset;            //8 Bit
+    int Subchannel_offset;            //7 Bit
+    int No_OFDMA_Symbols;             //7 Bit
+    int No_Subchannels;                // 7 Bit
+    int Ranging_Method;                 // 2 Bit
+    double Duration;                    //    10 Bit see 8.4.3.1 for simulation: in milliseconds  (originally in #OFDM-Symbols)
     int Repetition_Coding_Indication;//2 Bit
 
     double StartTime_Offset;//symbol_Offset;//8bit
     double StopTime_Offset;//time_offset;
 
-    int bits_for_burst;	// non-standard information transfered to the MobileStation
+    int bits_for_burst;    // non-standard information transfered to the MobileStation
     int realCID; // non-standard information to help the transceiver select the right packets for the uplink burst 
 }
 
@@ -188,12 +163,12 @@ packet Ieee80216UL_MAP extends Ieee80216ManagementFrame
 
     //Informationen der UL-MAP Nachricht
     //table 18
-    Management_Message_Type = ST_UL_MAP;	// 8 bits
-    int Reserved;						// 8 Bit
-    int uplinkChannelId;				// 8 bits
-    int UCD_Count;						// 8 bit
-    double allocation_start_time;		// 32bit Startpunkt an dem der uplink Unterrahmen begint
-    int No_OFDMA_Symbols;				// 8 Bit
+    Management_Message_Type = ST_UL_MAP;    // 8 bits
+    int Reserved;                        // 8 Bit
+    int uplinkChannelId;                // 8 bits
+    int UCD_Count;                        // 8 bit
+    double allocation_start_time;        // 32bit Startpunkt an dem der uplink Unterrahmen begint
+    int No_OFDMA_Symbols;                // 8 Bit
     Ieee80216UL_MAP_IE ulmap_ie_List[]; //
 }
 
@@ -211,8 +186,8 @@ packet Ieee80216_DCD extends Ieee80216ManagementFrame
     //table 358
     TLV_LEN16 BS_EIRP;
     TLV_LEN8 Channel_Nr; //8.5.
-    TLV_LEN8 TTG;	//only for TDD
-    TLV_LEN8 RTG;	//only for TDD
+    TLV_LEN8 TTG;    //only for TDD
+    TLV_LEN8 RTG;    //only for TDD
     TLV_LEN16 RSS;
     TLV_LEN24 Channel_Switch_Frame_Number;
     TLV_LEN32 Frequency;
@@ -226,9 +201,8 @@ packet Ieee80216_DCD extends Ieee80216ManagementFrame
     //int Channel_Switch_Frame_Nummber;
     //int Frequency;
     MACAddress BS_ID;
-	//int HARQ_ACK_delay_for_DL_burst;
-	//int MAC_version;
-
+    //int HARQ_ACK_delay_for_DL_burst;
+    //int MAC_version;
 }
 
 packet Ieee80216_UCD extends Ieee80216ManagementFrame
@@ -237,11 +211,11 @@ packet Ieee80216_UCD extends Ieee80216ManagementFrame
 
     //table 17
     Management_Message_Type = ST_UCD;
-    int Config_Change_Count;					//8
-    int Rng_Backoff_Start;						//8
-    int Rng_Backoff_End; 						//8
-    int Req_Backoff_Start;						//8
-    int Req_Backoff_End;						//8
+    int Config_Change_Count;                    //8
+    int Rng_Backoff_Start;                        //8
+    int Rng_Backoff_End;                         //8
+    int Req_Backoff_Start;                        //8
+    int Req_Backoff_End;                        //8
     MACAddress BS_ID;
     int UploadChannel;
     //table 349
@@ -273,45 +247,44 @@ packet Ieee80216_UCD extends Ieee80216ManagementFrame
     TLV_LEN8 Safety_Channel_Retry_Timer;
     TLV_LEN8 HARQ_ACK_delay_for_UL_burst;
     TLV_LEN8 CQICH_Band_AMCTransition_Delay;
-
 }
+
 //
-//	Tabele 19 Ranging request message
+//    Tabele 19 Ranging request message
 //
 packet Ieee80216_RNG_REQ extends Ieee80216ManagementFrame
 {
     CID = 0x0000;// Initial Ranging oder Basic CID
     //table 19
-    Management_Message_Type = ST_RNG_REQ;		// 8 Bit
-    int Reserved;							// 8 Bit
+    Management_Message_Type = ST_RNG_REQ;        // 8 Bit
+    int Reserved;                            // 8 Bit
 
     //table 364
-    int Requested_Downlink_Burst_Profile;	// 8 Bit
-    MACAddress MSS_MAC_Address;				// 48 Bit
-    int Ranging_Anomalies; 					// 8 Bit
-    int AAS_broadcast_capability;			// 8 Bit
+    int Requested_Downlink_Burst_Profile;    // 8 Bit
+    MACAddress MSS_MAC_Address;                // 48 Bit
+    int Ranging_Anomalies;                     // 8 Bit
+    int AAS_broadcast_capability;            // 8 Bit
 }
 
 packet Ieee80216_RNG_RSP extends Ieee80216ManagementFrame
 {
     CID = 0x0000;// Initial Ranging oder Basic CID
     //table 20
-    Management_Message_Type = ST_RNG_RSP;		// 8 Bit
-    int Reserved;							// 8 Bit
+    Management_Message_Type = ST_RNG_RSP;        // 8 Bit
+    int Reserved;                            // 8 Bit
 
     //table 367
-    double Timing_Adjust;						// 32 Bit 	
-    int Power_Level_Adjust;					// 8 Bit
-    double Offset_Frequency_Adjust;				// 32 Bit
-    int Ranging_Status;						// 8 Bit
-    double Downlink_frequency_override;			// 32 Bit
-    int Uplink_channel_ID_override;			// 8 Bit 
-    double Downlink_Operational_Burst_Profile;	// 16 Bit
-    MACAddress MSS_MAC_Address;					// 48 Bit 
-    int Basic_CID;		 						// 16 Bit 
-    int Primary_Management_CID;					// 16 Bit
-    int AAS_broadcast_permission;				// 8 Bit
-
+    double Timing_Adjust;                        // 32 Bit
+    int Power_Level_Adjust;                    // 8 Bit
+    double Offset_Frequency_Adjust;                // 32 Bit
+    int Ranging_Status;                        // 8 Bit
+    double Downlink_frequency_override;            // 32 Bit
+    int Uplink_channel_ID_override;            // 8 Bit 
+    double Downlink_Operational_Burst_Profile;    // 16 Bit
+    MACAddress MSS_MAC_Address;                    // 48 Bit 
+    int Basic_CID;                                 // 16 Bit 
+    int Primary_Management_CID;                    // 16 Bit
+    int AAS_broadcast_permission;                // 8 Bit
 }
 
 packet Ieee80216_SBC_REQ extends Ieee80216ManagementFrame
@@ -344,7 +317,6 @@ packet Ieee80216_REG_RSP extends Ieee80216ManagementFrame
 packet Ieee80216_MOB_NBR_ADV extends Ieee80216ManagementFrame
 {
     Management_Message_Type = ST_MOB_NBR_ADV;
-
 }
 
 packet Ieee80216_MSHO_REQ extends Ieee80216ManagementFrame
@@ -354,21 +326,18 @@ packet Ieee80216_MSHO_REQ extends Ieee80216ManagementFrame
     int nNewBSindex;//8Bits
     int cahngeCounterForMOB_NBR_ADV;//8Bits
     int neighborBSindex;//8Bits
-
 }
 
 packet Ieee80216_BSHO_RSP extends Ieee80216ManagementFrame
 {
     Management_Message_Type = ST_BSHO_RSP;
     int mode;//3Bits and 5Bits reserve
-
 }
 
 packet Ieee80216_MOB_HO_IND extends Ieee80216ManagementFrame
 {
     Management_Message_Type = ST_MOB_HO_IND;
     int mode;//3Bits and 5Bits reserve
-
 }
 
 packet Ieee80216_MOB_SCN_REQ extends Ieee80216ManagementFrame
@@ -378,7 +347,6 @@ packet Ieee80216_MOB_SCN_REQ extends Ieee80216ManagementFrame
     int interleavingInterval;//8Bits
     int scanIteration;//8Bits
     int changeCountMOBNBR;//8Bits
-
 }
 
 packet Ieee80216_MOB_SCN_RSP extends Ieee80216ManagementFrame
@@ -389,8 +357,8 @@ packet Ieee80216_MOB_SCN_RSP extends Ieee80216ManagementFrame
     int interleavingInterval;//8Bits
     int repordeMode;//8Bits
     int repordPeriiod;//8Bits
-    int repordMetric;//8Bits	
-    int scanIteration;//8Bits	
+    int repordMetric;//8Bits
+    int scanIteration;//8Bits
 }
 
 packet Ieee80216ServiceFlowFrame extends Ieee80216ManagementFrame
@@ -408,7 +376,7 @@ packet Ieee80216_DSA_REQ extends Ieee80216ServiceFlowFrame
 
 packet Ieee80216_DSA_RSP extends Ieee80216ServiceFlowFrame
 {
-    MACAddress mac_address;	// not in standard, helper field	
+    MACAddress mac_address;    // not in standard, helper field
 
     Management_Message_Type = ST_DSA_RSP;
 
@@ -419,16 +387,12 @@ packet Ieee80216_DSA_RSP extends Ieee80216ServiceFlowFrame
 
 packet Ieee80216_DSA_ACK extends Ieee80216ServiceFlowFrame
 {
-    MACAddress mac_address;	// not in standard, helper field
+    MACAddress mac_address;    // not in standard, helper field
 
     Management_Message_Type = ST_DSA_ACK;
     //short traffic_type enum(ip_traffic_types);
     ServiceFlow newServiceFlow;
 }
-
-
-
-
 
 packet Ieee80216_DSC_REQ extends Ieee80216ServiceFlowFrame
 {

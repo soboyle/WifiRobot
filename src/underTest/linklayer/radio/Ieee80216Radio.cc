@@ -1,5 +1,4 @@
 
-
 #include "Ieee80216Radio.h"
 //#include "omnetpp.h"
 
@@ -7,33 +6,36 @@ Define_Module(Ieee80216Radio);
 
 void Ieee80216Radio::initialize(int stage)
 {
-	AbstractRadioExtended::initialize(stage);
+    AbstractRadioExtended::initialize(stage);
 
-	if (stage==2 && !par("isInput").boolValue())
-	{
-	    if (ccExt)
-	       {
-	         ((ChannelControlExtended::HostRefExtended)myHostRef)->unregisterRadio(this);
-	      }
-	  }
+    if (stage == 2 && !par("isInput").boolValue())
+    {
+        if (ccExt)
+        {
+            ((ChannelControlExtended::HostRefExtended) myHostRef)->unregisterRadio(this);
+        }
+    }
 
-	if (stage == 0)
-	{
-		rs.setRadioId(this->getId());    //Aenderung am 6 Dezember neue FUnktion in RadioState eingefuegt
-		EV << "Roland Module Id " << this->getId() << endl;
-		EV << "Roland RS Module Id " << rs.getRadioId() << endl;
-	}
-	isCollision = false;
-	collisions = 0;
-}
-void Ieee80216Radio::finish() {
-	recordScalar("# of collisions", collisions);
+    if (stage == 0)
+    {
+        rs.setRadioId(this->getId()); //Aenderung am 6 Dezember neue FUnktion in RadioState eingefuegt
+        EV << "Roland Module Id " << this->getId() << endl;
+        EV << "Roland RS Module Id " << rs.getRadioId() << endl;
+    }
+    isCollision = false;
+    collisions = 0;
 }
 
-void Ieee80216Radio::handleLowerMsgStart(AirFrame * airframe)
+void Ieee80216Radio::finish()
+{
+    recordScalar("# of collisions", collisions);
+}
+
+void Ieee80216Radio::handleLowerMsgStart(AirFrame *airframe)
 {
     // Calculate the receive power of the message
-	EV << "(in Ieee80216Radio::handleLowerMsgStart) " << airframe->getClassName() << airframe->getName() << " eingetroffen.\n";
+    EV << "(in Ieee80216Radio::handleLowerMsgStart) " << airframe->getClassName() <<
+        airframe->getName() << " eingetroffen.\n";
     // calculate distance
     const Coord& myPos = getMyPosition();
     const Coord& framePos = airframe->getSenderPos();
@@ -41,7 +43,8 @@ void Ieee80216Radio::handleLowerMsgStart(AirFrame * airframe)
 
     // calculate receive power
     //receptionModel->setAbweichung(abweichung);
-    double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
+    double rcvdPower =
+        receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
 
     // store the receive power in the recvBuff
     recvBuff[airframe] = rcvdPower;
@@ -51,10 +54,11 @@ void Ieee80216Radio::handleLowerMsgStart(AirFrame * airframe)
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    ev << "\n\nrcvdPower: "<< rcvdPower << "    sensitivity: "<< sensitivity << "\n";
-    ev << "radio state: "<< rs.getState() << "   snrptr: " << snrInfo.ptr << "\n\n";
+    ev << "\n\nrcvdPower: " << rcvdPower << "    sensitivity: " << sensitivity << "\n";
+    ev << "radio state: " << rs.getState() << "   snrptr: " << snrInfo.ptr << "\n\n";
 
-    if (airframe->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (airframe->getArrivalTime() == simTime() && rcvdPower >= sensitivity
+        && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
         EV << "receiving frame " << airframe->getName() << endl;
 
@@ -70,14 +74,14 @@ void Ieee80216Radio::handleLowerMsgStart(AirFrame * airframe)
         //char buf[90];
         //sprintf(buf, "rcvdPower: %f", snrInfo.rcvdPower);
         //displayString().setTagArg("t",0,buf);
-        ev << "Achtung RS Radio rcvdPower:" << rcvdPower <<" SNR:" << log10(snrInfo.rcvdPower/noiseLevel) <<".\n";
+        ev << "Achtung RS Radio rcvdPower:" << rcvdPower << " SNR:" <<
+            log10(snrInfo.rcvdPower / noiseLevel) << ".\n";
         if (rs.getState() != RadioState::RECV)
         {
             // publish new RadioState
             EV << "publish new RadioState:RECV\n";
             setRadioState(RadioState::RECV);
         }
-
     }
     // receive power is too low or another message is being sent or received
     else
@@ -105,9 +109,10 @@ void Ieee80216Radio::handleLowerMsgStart(AirFrame * airframe)
     }
 }
 
-void Ieee80216Radio::handleLowerMsgEnd(AirFrame * airframe)
+void Ieee80216Radio::handleLowerMsgEnd(AirFrame *airframe)
 {
-	EV << "(in Ieee80216Radio::handleLowerMsgEnd) " << airframe->getClassName()<< airframe->getName() << " eingetroffen.\n";
+    EV << "(in Ieee80216Radio::handleLowerMsgEnd) " << airframe->getClassName() <<
+        airframe->getName() << " eingetroffen.\n";
     // check if message has to be send to the decider
     if (snrInfo.ptr == airframe)
     {
@@ -116,7 +121,7 @@ void Ieee80216Radio::handleLowerMsgEnd(AirFrame * airframe)
         SnrList list;
         list = snrInfo.sList;
 
-	double rcvdPower = snrInfo.rcvdPower;
+        double rcvdPower = snrInfo.rcvdPower;
 
         // delete the pointer to indicate that no message is currently
         // being received and clear the list
@@ -133,19 +138,19 @@ void Ieee80216Radio::handleLowerMsgEnd(AirFrame * airframe)
         //    delete airframe;
         if (!radioModel->isReceivedCorrectly(airframe, list))
         {
-            airframe->getEncapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
-            airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
-            isCollision=true;
+            airframe->getEncapsulatedMsg()->setKind(list.size() > 1 ? COLLISION : BITERROR);
+            airframe->setName(list.size() > 1 ? "COLLISION" : "BITERROR");
+            isCollision = true;
             collisions++;
         }
         /*if(isCollision == false)
-        	sendUp(airframe, list);
-        if(isCollision == true)
-        {
-            isCollision=false;
-            delete airframe;
-        }*/
-    	sendUp(airframe, list, rcvdPower);
+           sendUp(airframe, list);
+           if(isCollision == true)
+           {
+           isCollision=false;
+           delete airframe;
+           } */
+        sendUp(airframe, list, rcvdPower);
     }
     // all other messages are noise
     else
@@ -182,12 +187,13 @@ void Ieee80216Radio::handleLowerMsgEnd(AirFrame * airframe)
 
 void Ieee80216Radio::sendUp(AirFrame *airframe, SnrList list, double rcvdPower)
 {
-	EV << "(in Ieee80216Radio::sendUp) " << airframe->getClassName() << airframe->getName() << " eingetroffen.\n";
+    EV << "(in Ieee80216Radio::sendUp) " << airframe->getClassName() << airframe->getName() <<
+        " eingetroffen.\n";
     const Coord& myPos = getMyPosition();
     const Coord& framePos = airframe->getSenderPos();
     double distance = myPos.distance(framePos);
-	//double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
-	//double sendPower= airframe->getPSend();
+    //double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
+    //double sendPower= airframe->getPSend();
     cMessage *frame = airframe->decapsulate();
     delete airframe;
 
@@ -200,22 +206,22 @@ void Ieee80216Radio::sendUp(AirFrame *airframe, SnrList list, double rcvdPower)
     {
         //if (iter->snr < snrMin)
         //    snrMin = iter->snr;
-    	++Zaehler;
-	EV << "Radio Module iter" << Zaehler <<" snr:" << iter->snr <<"\n";
-    	snrGes = snrGes + iter->snr;
+        ++Zaehler;
+        EV << "Radio Module iter" << Zaehler << " snr:" << iter->snr << "\n";
+        snrGes = snrGes + iter->snr;
     }
-    snrMit = snrGes/Zaehler;
-	EV << "Radio Module sntMit" << snrMit <<" snr Ges:" << snrGes <<" Zähler:"<< Zaehler <<"\n";
+    snrMit = snrGes / Zaehler;
+    EV << "Radio Module sntMit" << snrMit << " snr Ges:" << snrGes << " Zähler:" << Zaehler << "\n";
 
     Ieee80216MacHeader *macFrame = dynamic_cast<Ieee80216MacHeader *>(frame); // Empfangendes Paket ist eine IEEE802.16e Frame
     if (macFrame)
     {
-    	macFrame->setSNR(10*log10(snrMit));
-	macFrame->setRcvdPower(rcvdPower);
-	macFrame->setThermNoise(noiseLevel);
-    	macFrame->setAbstand(distance);
-    	macFrame->setXPos(myPos.x);
-    	macFrame->setYPos(myPos.y);
+        macFrame->setSNR(10 * log10(snrMit));
+        macFrame->setRcvdPower(rcvdPower);
+        macFrame->setThermNoise(noiseLevel);
+        macFrame->setAbstand(distance);
+        macFrame->setXPos(myPos.x);
+        macFrame->setYPos(myPos.y);
     }
     EV << "sending up frame " << frame->getName() << endl;
     send(frame, uppergateOut);
@@ -223,5 +229,5 @@ void Ieee80216Radio::sendUp(AirFrame *airframe, SnrList list, double rcvdPower)
 
 SnrList Ieee80216Radio::getSNRlist()
 {
-	return snrInfo.sList;
+    return snrInfo.sList;
 }

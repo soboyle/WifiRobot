@@ -16,21 +16,16 @@ ConvergenceSublayerUp::~ConvergenceSublayerUp()
 
 void ConvergenceSublayerUp::initialize()
 {
-
 }
 
 void ConvergenceSublayerUp::handleMessage(cMessage *msg)
-{	
+{
     if (msg->arrivedOn("lowergateIn"))
     {
-	send(msg,"uppergateOut");
+        send(msg, "uppergateOut");
     }
     else
     {
-    ev << "nothing" << endl;
+        ev << "nothing" << endl;
     }
 }
-
-
-
-

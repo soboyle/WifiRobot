@@ -4,8 +4,6 @@
 
 Define_Module(ConvergenceSublayerDown);
 
-
-
 ConvergenceSublayerDown::ConvergenceSublayerDown()
 {
     endTransmissionEvent = NULL;
@@ -18,22 +16,16 @@ ConvergenceSublayerDown::~ConvergenceSublayerDown()
 
 void ConvergenceSublayerDown::initialize()
 {
-
 }
 
 void ConvergenceSublayerDown::handleMessage(cMessage *msg)
-{	
+{
     if (msg->arrivedOn("uppergateIn"))
     {
-	send(msg,"lowergateOut");
+        send(msg, "lowergateOut");
     }
     else
     {
-    ev << "nothing" << endl;
+        ev << "nothing" << endl;
     }
-
 }
-
-
-
-

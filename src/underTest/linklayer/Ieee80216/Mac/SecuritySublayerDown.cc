@@ -16,22 +16,16 @@ SecuritySublayerDown::~SecuritySublayerDown()
 
 void SecuritySublayerDown::initialize()
 {
-
 }
 
 void SecuritySublayerDown::handleMessage(cMessage *msg)
-{	
+{
     if (msg->arrivedOn("uppergateIn"))
     {
-	send(msg,"lowergateOut");
+        send(msg, "lowergateOut");
     }
     else
     {
-    ev << "nothing" << endl;
+        ev << "nothing" << endl;
     }
-
 }
-
-
-
-
