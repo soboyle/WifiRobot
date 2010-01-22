@@ -8,6 +8,7 @@
 
 #include "SnrList.h"
 #include "ModulationsConsts.h"
+#include "Ieee80216ManagementMessages_m.h"
 
 #include <math.h>
 
