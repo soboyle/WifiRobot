@@ -27,20 +27,16 @@ void ConvergenceSublayerControlModule::initialize()
 
 void ConvergenceSublayerControlModule::handleMessage(cMessage *msg)
 {
-    // FIXME use "else" between "if"s !!!
-
     if (msg->isSelfMessage())
     {                           //msg comes from outside (the packet generator).
         handleSelfMessage(msg);
     }
-
-    if (msg->getArrivalGateId() == outerIn)
+    else if (msg->getArrivalGateId() == outerIn)
     {
         handleUpperLayerMessage(check_and_cast<cPacket *>(msg));
     }
-
     //If the message comes back from classification, fragment/pack it
-    if (msg->getArrivalGateId() == tcIn)
+    else if (msg->getArrivalGateId() == tcIn)
     {
 
         if (dynamic_cast<Ieee80216_DSA_REQ *>(msg))

@@ -28,7 +28,6 @@ void ConvergenceSublayerHeaderCompression::handleMessage(cMessage *msg)
     {
         send(msg, commonPartGateOut);
     }
-
     //packet arrives from commonPartSublayer
     else if (msg->getArrivalGateId() == commonPartGateIn)
     {

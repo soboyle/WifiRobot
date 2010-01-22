@@ -29,8 +29,7 @@ void CommonPartSublayerDown::handleMessage(cMessage *msg)
     {
         handleControlPlaneMsg(msg);
     }
-
-    if (msg->arrivedOn("uppergateIn"))
+    else if (msg->arrivedOn("uppergateIn"))
     {
         //handleUpperMsg(msg);
     }

@@ -74,7 +74,7 @@ void ConvergenceSublayerTrafficClassification::handleMessage(cMessage *msg)
         handleSelfMessage(msg);
 //  }
     }
-    if (msg->isPacket())
+    else if (msg->isPacket())
     {
         EV << "(in handleMessage) Message " << msg->getName() << " ist ein Paket.\n";
         // || -> XOR, alternative ist eine Switch-Konstruktion dazu.
