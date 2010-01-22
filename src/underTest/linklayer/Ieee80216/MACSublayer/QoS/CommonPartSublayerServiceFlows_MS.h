@@ -22,7 +22,7 @@ class CommonPartSublayerServiceFlows_MS : public CommonPartSublayerServiceFlows
 
   protected:
     void initialize();
-    void handleMessage(cPacket *msg);
+    void handleMessage(cMessage *msg);
     void handle_DSA_REQ(Ieee80216_DSA_REQ *dsa_req);
     void handle_DSA_RSP(Ieee80216_DSA_RSP *dsa_rsp);
     void handle_DSA_ACK(Ieee80216_DSA_ACK *dsa_ack);

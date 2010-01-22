@@ -21,20 +21,20 @@ void CommonPartSublayerUp::initialize()
     endTransmissionEvent = new cMessage("endTxEvent");
 }
 
-void CommonPartSublayerUp::handleMessage(cPacket *msg)
+void CommonPartSublayerUp::handleMessage(cMessage *msg)
 {
     // handle commands
-    if (msg->arrivedOn("controlIn") && msg->getByteLength() == 0)
+/*    if (msg->arrivedOn("controlIn") && msg->getByteLength() == 0)
     {
     }
-
+*/
     if (msg->arrivedOn("controlIn"))
     {
         //send(msg,"lowergateOut");
     }
     else if (msg->arrivedOn("lowergateIn")) // Nachricht vom physikal Layer empfangen
     {
-        handleLowerMsg(msg);
+        handleLowerMsg(check_and_cast<cPacket *>(msg));
     }
     else
     {

@@ -26,7 +26,7 @@ class CommonPartSublayerUp : public cSimpleModule
   protected:
     void initialize();
 
-    void handleMessage(cPacket *msg);
+    void handleMessage(cMessage *msg);
     void handleCommand(int msgkind, cPolymorphic *ctrl);
 
     void handleLowerMsg(cPacket *msg);

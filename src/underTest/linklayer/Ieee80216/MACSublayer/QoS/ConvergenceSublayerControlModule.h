@@ -29,7 +29,7 @@ class ConvergenceSublayerControlModule : public cSimpleModule
 
   protected:
     void initialize();
-    void handleMessage(cPacket *msg);
+    void handleMessage(cMessage *msg);
     void handleUpperLayerMessage(cPacket *msg);
     void handleSelfMessage(cMessage *msg);
 };

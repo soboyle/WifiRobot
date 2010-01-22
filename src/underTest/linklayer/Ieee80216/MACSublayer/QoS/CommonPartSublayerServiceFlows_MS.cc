@@ -20,12 +20,12 @@ void CommonPartSublayerServiceFlows_MS::initialize()
     controlPlaneOut = findGate("controlPlaneOut");
 }
 
-void CommonPartSublayerServiceFlows_MS::handleMessage(cPacket *msg)
+void CommonPartSublayerServiceFlows_MS::handleMessage(cMessage *msg)
 {
     Ieee80216ManagementFrame* manFrame = dynamic_cast<Ieee80216ManagementFrame *>(msg); // Empfangendes Paket ist eine IEEE802.16e Frame
     if (!manFrame)              // Wenn nicht Fehlermeldung ausgeben
-        error("Message from ControlPlane is not an IEEE 802.16e MAC management frame",
-              msg->getClassName(), msg->getName(), msg->getByteLength());
+        error("Message (%s) %s from ControlPlane is not an IEEE 802.16e MAC management frame",
+              msg->getClassName(), msg->getName());
 
     switch (manFrame->getManagement_Message_Type())
     {

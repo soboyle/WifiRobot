@@ -25,8 +25,10 @@ void ConvergenceSublayerControlModule::initialize()
     //scheduleAt(0.005, timerEvent);
 }
 
-void ConvergenceSublayerControlModule::handleMessage(cPacket *msg)
+void ConvergenceSublayerControlModule::handleMessage(cMessage *msg)
 {
+    // FIXME use "else" between "if"s !!!
+
     if (msg->isSelfMessage())
     {                           //msg comes from outside (the packet generator).
         handleSelfMessage(msg);
@@ -34,7 +36,7 @@ void ConvergenceSublayerControlModule::handleMessage(cPacket *msg)
 
     if (msg->getArrivalGateId() == outerIn)
     {
-        handleUpperLayerMessage(msg);
+        handleUpperLayerMessage(check_and_cast<cPacket *>(msg));
     }
 
     //If the message comes back from classification, fragment/pack it
