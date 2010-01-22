@@ -185,6 +185,15 @@ void Ieee80211aRadioModel::initializeFrom(cModule *radioModule)
    else
          phyOpMode='b';
 
+    parseTable = NULL;
+    const char *fname = radioModule->par("berTableFile");
+    std::string name (fname);
+    if (!name.empty())
+    {
+    	parseTable = new BerParseFile(phyOpMode);
+    	parseTable->parseFile(fname);
+    }
+
     channelModel = radioModule->hasPar("channelModel") ? radioModule->par("channelModel") : 'r';
 
     if (channelModel==1)
@@ -400,10 +409,14 @@ bool Ieee80211aRadioModel::isPacketOK(unsigned char *buffer, double snirMin, int
     if ((phyOpMode=='g') || (phyOpMode=='a'))//added by Sorin Cocorada
         headerNoError = pow(1.0 - berHeader, 24);//PLCP Header 24bit(without SERVICE), 6Mbps
     else
-    headerNoError = pow(1.0 - berHeader, HEADER_WITHOUT_PREAMBLE);
+    	headerNoError = pow(1.0 - berHeader, HEADER_WITHOUT_PREAMBLE);
 
     // probability of no bit error in the MPDU
-    double MpduNoError = pow(1.0 - berMPDU, length);
+    double MpduNoError;
+    if (parseTable)
+    	MpduNoError=1-parseTable->getPer(bitrate,snirMin,length);
+    else
+    	MpduNoError = pow(1.0 - berMPDU, length);
     EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" length: "<<length<<" PER: "<<1-MpduNoError<<endl;
     double rand = dblrand();
 

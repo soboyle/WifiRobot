@@ -28,6 +28,16 @@ Register_Class(Ieee80211RadioModel);
 void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 {
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
+
+    parseTable = NULL;
+    const char *fname = radioModule->par("berTableFile");
+    std::string name (fname);
+    if (!name.empty())
+    {
+    	parseTable = new BerParseFile('b');
+    	parseTable->parseFile(fname);
+    }
+
 }
 
 double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
@@ -86,7 +96,11 @@ bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     double headerNoError = pow(1.0 - berHeader, HEADER_WITHOUT_PREAMBLE);
 
     // probability of no bit error in the MPDU
-    double MpduNoError = pow(1.0 - berMPDU, lengthMPDU);
+    double MpduNoError;
+    if (parseTable)
+    	MpduNoError=1-parseTable->getPer(bitrate,snirMin,lengthMPDU);
+    else
+    	MpduNoError = pow(1.0 - berMPDU, lengthMPDU);
     EV << "berHeader: " << berHeader << " berMPDU: " << berMPDU << endl;
     double rand = dblrand();
 

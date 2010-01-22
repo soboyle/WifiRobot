@@ -20,7 +20,7 @@
 #define IEEE80211RADIOMODEL_H
 
 #include "IRadioModel.h"
-
+#include "BerParseFile.h"
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
@@ -30,6 +30,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
 {
   protected:
     double snirThreshold;
+	BerParseFile *parseTable;
 
   public:
     virtual void initializeFrom(cModule *radioModule);

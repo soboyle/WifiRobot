@@ -43,7 +43,7 @@ simple Ieee80211aRadio extends PropagationModel
         double pathLossAlpha = default(2); // used by the path loss calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         double sensitivity @unit("dBm"); // received signals with power below sensitivity are ignored
-
+        string berTableFile=default("");
 
         double systemLoss = default(1); // Loss rate due to system 1 The system don't have power loss : numeric const, // 
         double ht @unit("m") = default(30m); // Two ray model : numeric const,

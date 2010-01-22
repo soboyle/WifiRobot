@@ -42,7 +42,8 @@ simple Ieee80211gRadio extends PropagationModel
         double pathLossAlpha = default(2); // used by the path loss calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         double sensitivity @unit("dBm"); // received signals with power below sensitivity are ignored
-        string berTableFile;
+        string berTableFile=default("");
+        bool   useBerClass = default(false);
         int phyOpMode= default(2); // 1='b', 2='g'
         int channelModel = default (1); // 1=(Rayleigh) or 2= a (AWGN)
         

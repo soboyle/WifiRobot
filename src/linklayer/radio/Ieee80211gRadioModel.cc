@@ -559,9 +559,13 @@ void Ieee80211gRadioModel::initializeFrom(cModule *radioModule)
     std::string name (fname);
     if (!name.empty())
     {
-      //    parseTable = new BerParseFile(phyOpMode);
-      //    parseTable->parseFile(fname);
-          parseFile(fname);
+    	  if (radioModule->par("useBerClass"))
+    	  {
+    		  parseTable = new BerParseFile(phyOpMode);
+    		  parseTable->parseFile(fname);
+    	  }
+    	  else
+    		  parseFile(fname);
           fileBer=true;
     }
     else
