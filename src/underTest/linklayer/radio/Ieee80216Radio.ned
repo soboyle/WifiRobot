@@ -13,6 +13,7 @@ simple Ieee80216Radio
         double sensitivity @unit("dBm") = default(-85dBm); 		// received signals with power below sensitivity are ignored
         string attenuationModel = default("WiMAXPathLossReceptionModel");
         bool isInput;
+        double pathLossAlpha = default(2); // used by the path loss calculation
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)
         output uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
