@@ -118,7 +118,8 @@ void TrafGen::initialize(int aStage)
             mOnIdenticalDest = false;
         }
 
-        mDestination = rootelement->getElementById(id)->getAttribute("trafDest");
+        const char *destination = rootelement->getElementById(id)->getAttribute("trafDest");
+        mDestination = destination ? destination : "";
         if (mDestination == std::string("-1"))
         {
             mDestination = "BROADCAST"; // Broadcast
