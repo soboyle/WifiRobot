@@ -2034,21 +2034,12 @@ bool ControlPlaneMobilestation::hasUplinkGrants()
 
 bool ControlPlaneMobilestation::isCorrectDLMAP(cMessage *msg)
 {
-    if (dynamic_cast<Ieee80216DL_MAP *>(msg))
+    Ieee80216DL_MAP *frame = dynamic_cast<Ieee80216DL_MAP *>(msg);
+    if (frame)
     {
-        Ieee80216DL_MAP *frame = check_and_cast<Ieee80216DL_MAP *>(msg);
-        structBasestationInfo *connectedBasestation;
-        connectedBasestation = NULL;
-        connectedBasestation = lookupBS(&(frame->getBS_ID()));
+        structBasestationInfo *connectedBasestation = lookupBS(&(frame->getBS_ID()));
 
-        if (connectedBasestation == NULL)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return (connectedBasestation != NULL);
     }
     else
     	return false;
