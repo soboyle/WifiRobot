@@ -2112,6 +2112,11 @@ management_type ControlPlaneMobilestation::getManagementType(int CID)
     {
         return SECONDARY;
     }
+    else
+    {
+		return (management_type)-1; // FIXME  is this correct?
+    	//    	throw cRuntimeError("Unexpected CID value: %d", CID);
+    }
 }
 
 station_type ControlPlaneMobilestation::getStationType()
