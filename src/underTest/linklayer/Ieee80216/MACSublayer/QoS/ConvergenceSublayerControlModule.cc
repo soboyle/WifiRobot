@@ -1,5 +1,5 @@
 #include "ConvergenceSublayerControlModule.h"
-#include "IP.h";
+#include "IP.h"
 
 Define_Module(ConvergenceSublayerControlModule);
 

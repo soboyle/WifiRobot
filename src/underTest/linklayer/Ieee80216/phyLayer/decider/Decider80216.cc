@@ -76,7 +76,7 @@ void Decider80216::getSnrList(AirFrame* af, SnrList& receivedList)
     EV << "mit der Distanz: " << distance << ", ";
     EV << "mit dem SNR: " << listEntry.snr << "\n";
 
-    for (cSubModIterator iter(*subParent); !iter.end(); iter++)
+    for (cModule::SubmoduleIterator iter(subParent); !iter.end(); iter++)
     {
         ev << "Roland Parent Module: " << iter()->getFullName() << "\n";
     }

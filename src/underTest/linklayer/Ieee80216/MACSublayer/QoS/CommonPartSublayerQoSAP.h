@@ -2,11 +2,11 @@
 #include <string.h>
 #include <omnetpp.h>
 
-#include "IInterfaceTable.h";
-// #include "InterfaceEntry.h";
+#include "IInterfaceTable.h"
+// #include "InterfaceEntry.h"
 
 /**
- * Module for WiMAX convergency traffic classification 
+ * Module for WiMAX convergency traffic classification
  */
 class CommonPartSublayerQoSAP : public cSimpleModule
 {

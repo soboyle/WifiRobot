@@ -1,8 +1,8 @@
 #include "CommonPartSublayerQoSAP.h"
 #include "PhyControlInfo_m.h"
 
-#include "InterfaceTableAccess.h";
-#include "InterfaceEntry.h";
+#include "InterfaceTableAccess.h"
+#include "InterfaceEntry.h"
 
 Define_Module(CommonPartSublayerQoSAP);
 
