@@ -328,8 +328,9 @@ void CommonPartSublayerTransceiver::handleControlRequest(cMessage *msg)
         if (bla)
         {
             Ieee80216Prim_sendControlRequest *blub =
-                dynamic_cast<Ieee80216Prim_sendControlRequest *>(bla);
+                check_and_cast<Ieee80216Prim_sendControlRequest *>(bla);
             EV << "nextControlQueueElement ALT CID: " << blub->getPduCID() << "\n";
+            delete bla;
         }
         else
             EV << "nextControlQueueElement ALT CID: keine CONTROLINFO in der Nachricht vorhanden\n";
@@ -343,7 +344,6 @@ void CommonPartSublayerTransceiver::handleControlRequest(cMessage *msg)
             cancelEvent(nextControlQueueElement);
 
         scheduleAt(simTime(), nextControlQueueElement);
-
     }
     else if (dynamic_cast<Ieee80216Prim_stopControlRequest *>(ctrl))
     {
@@ -356,6 +356,7 @@ void CommonPartSublayerTransceiver::handleControlRequest(cMessage *msg)
 //      flushTransmissionBuffer();
 
         updateDisplay();
+        delete ctrl;
     }
 /*
     else if (dynamic_cast<Ieee80216Prim_sendDataRequest *>(ctrl))
@@ -389,7 +390,7 @@ void CommonPartSublayerTransceiver::handleCommand(cMessage *msg)
         EV << "Empfange Kontrolnachricht " << msg->getName() << " fuer das Transceiver-Radio-Modul.\n";
         if (pendingRadioConfigMsg != NULL)
         {
-            EV << "pendingRadioConfigMsg != NULL, d.h. es gibt noch alte Kommands für das RadioModul.\n";
+            EV << "pendingRadioConfigMsg != NULL, d.h. es gibt noch alte Kommands fï¿½r das RadioModul.\n";
             // wenn es alte Befehle fuer das Radio Module gibt die nicht versendet werden konnten. Werden die mit den neuen Werten abgeglichen
             PhyControlInfo *pOld =
                 check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());

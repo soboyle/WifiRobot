@@ -25,6 +25,7 @@ ControlPlaneMobilestation::ControlPlaneMobilestation()
 //Netentry timer
     ScanChannelTimer = NULL;
     DLMAPTimer = NULL;
+    RegRspTimeOut = NULL;
     RngRspTimeOut = NULL;
     RngRegFail = NULL;
     ScnRegFail = NULL;
@@ -85,6 +86,7 @@ ControlPlaneMobilestation::~ControlPlaneMobilestation()
 {
     cancelAndDelete(ScanChannelTimer); //Timer startet den Scanvorgang nach einer g�ltigen DL-Map
     cancelAndDelete(DLMAPTimer);
+    cancelAndDelete(RegRspTimeOut);
     cancelAndDelete(RngRspTimeOut);
     cancelAndDelete(RngRegFail);
     cancelAndDelete(ScnRegFail);
@@ -1222,7 +1224,7 @@ void ControlPlaneMobilestation::handleUL_MAPFrame(cMessage *msg)
 {
     ev << "(in ControlPlaneMobilestation::handleUL_MAPFrame) " << msg << endl;
     stationHasUplinkGrants = false;
-    long tx_data_in_next_ul_subframe = 0;
+    //long tx_data_in_next_ul_subframe = 0;
 
     Ieee80216UL_MAP* frame = check_and_cast<Ieee80216UL_MAP *>(msg);
 

@@ -31,6 +31,20 @@
 /**
  * Initialization routine
  */
+
+TrafGen::TrafGen()
+ :
+	mpSendMessage(NULL),
+	mpOnOffSwitch(NULL)
+{
+}
+
+TrafGen::~TrafGen()
+{
+    cancelAndDelete(mpSendMessage);
+    cancelAndDelete(mpOnOffSwitch);
+}
+
 void TrafGen::initialize(int aStage)
 {
     cSimpleModule::initialize(aStage);
@@ -145,10 +159,6 @@ void TrafGen::initialize(int aStage)
  */
 void TrafGen::finish()
 {
-    cancelEvent(mpSendMessage);
-    delete mpSendMessage;
-    cancelEvent(mpOnOffSwitch);
-    delete mpOnOffSwitch;
 }
 
 //============================= OPERATIONS ===================================

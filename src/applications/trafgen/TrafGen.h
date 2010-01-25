@@ -85,6 +85,8 @@ Nodes sending no traffic can be achieved by two methods:
 class TrafGen : public cSimpleModule
 {
   public:
+	TrafGen();
+	~TrafGen();
     // LIFECYCLE
     // this takes care of constructors and destructors
     virtual void initialize(int);

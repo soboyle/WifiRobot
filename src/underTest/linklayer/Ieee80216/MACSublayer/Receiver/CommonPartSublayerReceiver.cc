@@ -12,6 +12,13 @@ CommonPartSublayerReceiver::CommonPartSublayerReceiver()
 
 CommonPartSublayerReceiver::~CommonPartSublayerReceiver()
 {
+	for (map<string, vector<cOutVector *> >::iterator it = map_delay_vectors.begin(); it != map_delay_vectors.end(); it++)
+	{
+		for (vector<cOutVector *>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+		{
+			delete *it2;
+		}
+	}
 }
 
 void CommonPartSublayerReceiver::initialize()
