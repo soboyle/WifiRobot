@@ -121,7 +121,7 @@ void CommonPartSublayerUp::handleMacFrameType(Ieee80216MacHeader *MacFrame)
     {
         Ieee80216BandwidthMacHeader* BandwidthMacFrame =
             dynamic_cast<Ieee80216BandwidthMacHeader *>(MacFrame);
-        if (!MacFrame)          // Wenn nicht Fehlermeldung ausgeben
+        if (!BandwidthMacFrame)          // Wenn nicht Fehlermeldung ausgeben
             error("Message is not a IEEE 802.16e Bandwidth MAC frame", MacFrame->getClassName(),
                   MacFrame->getName(), MacFrame->getByteLength());
     }

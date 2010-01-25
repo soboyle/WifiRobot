@@ -418,12 +418,12 @@ void ControlPlaneMobilestation::handleLowerLayerMsg(cMessage *msg)
     SubType Type;               //SubType ist ein Struct und ist in Ieee80216Frame.msg defeniert. Er kenzeichnet ob Subheader vorhanden sind.
     Type = frame->getTYPE();
 
-    if (Type.Subheader = 1)
+    if (Type.Subheader == 1)
     {
         handleManagementFrame(frame);
     }
 
-    if (msg->getOwner() == this)
+    // if (msg->getOwner() == this)  // FIXME
         delete msg;
 }
 
@@ -1234,7 +1234,7 @@ void ControlPlaneMobilestation::handleUL_MAPFrame(cMessage *msg)
 
     EV << "MS: #UL-MAP_IE in UL-MAP: " << frame->getUlmap_ie_ListArraySize() << "\n";
 
-    for (int i = 0; i < frame->getUlmap_ie_ListArraySize(); i++)
+    for (unsigned int i = 0; i < frame->getUlmap_ie_ListArraySize(); i++)
     {
         EV << "  " << frame->getUlmap_ie_List(i).getCID() << "\n";
     }
@@ -1257,7 +1257,7 @@ void ControlPlaneMobilestation::handleUL_MAPFrame(cMessage *msg)
     {
         if (frame->getUlmap_ie_ListArraySize() > 0) //gibt es eine UL-MAP Informationselement
         {
-            for (int i = 0; i < frame->getUlmap_ie_ListArraySize(); ++i)
+            for (unsigned int i = 0; i < frame->getUlmap_ie_ListArraySize(); ++i)
             {
                 // (mk)
                 if (frame->getUlmap_ie_List(i).getCID() == localMobilestationInfo.Basic_CID)
@@ -1364,7 +1364,7 @@ void ControlPlaneMobilestation::getRangingUL_MAP_IE(Ieee80216UL_MAP *frame)
     ev << "(in ControlPlaneMobilestation::getRangingUL_MAP_IE) " << frame << endl;
     rangingStart();             //Funktion zur Bestimmung des Ranging Intervall Slots
 
-    for (int i = 0; i < frame->getUlmap_ie_ListArraySize(); ++i)
+    for (unsigned int i = 0; i < frame->getUlmap_ie_ListArraySize(); ++i)
     {
         if (frame->getUlmap_ie_List(i).getCID() == 0)
         {

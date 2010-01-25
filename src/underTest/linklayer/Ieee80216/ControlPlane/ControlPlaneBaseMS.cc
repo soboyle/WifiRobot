@@ -84,7 +84,6 @@ void ControlPlaneBaseMS::handleMessage(cMessage *msg)
         // process timers
         EV << "Received " << msg << " from it self" << endl;
         handleTimer(msg);
-
     }
     else if (msg->arrivedOn("cpsUpIn")) // Abarbeiten von Nachrichten die vom MAC Module gesendet werden
     {
@@ -96,10 +95,15 @@ void ControlPlaneBaseMS::handleMessage(cMessage *msg)
         SubType Type;           //SubType ist ein Struct und ist in Ieee80216Frame.msg defeniert. Er kenzeichnet ob Subheader vorhanden sind.
         Type = frame->getTYPE();
 
-        if (Type.Subheader = 1)
+        if (Type.Subheader == 1)
         {
             EV << "Subheader\n";
             handleManagmentFrame(frame);
+        }
+        else
+        {
+        	error("unhandled message: %s (type: %s)\n", msg->getName(), msg->getClassName());
+        	delete msg;
         }
     }
     else                        // Abarbeiten von Nachrichten die vom überliegenden Schichten gesendet werden
@@ -141,7 +145,7 @@ void ControlPlaneBaseMS::handleManagmentFrame(Ieee80216GenericMacHeader *Generic
         break;
 
     default:
-        error("error");
+        error("Invalid management message type: %i",Mgmtframe->getManagement_Message_Type());
     }
 }
 
@@ -149,6 +153,8 @@ void ControlPlaneBaseMS::handleCommand(int msgkind, cPolymorphic *ctrl)
 {
     if (dynamic_cast<Ieee80216Prim_ScanRequest *>(ctrl))
         processScanCommand((Ieee80216Prim_ScanRequest *) ctrl);
+    else
+    	error("unhandled message: %s (type: %s)\n", ctrl->getName(), ctrl->getClassName());
 
 //    else if (ctrl);
     delete ctrl;
@@ -181,6 +187,7 @@ void ControlPlaneBaseMS::handleTimer(cMessage *msg)
 
 void ControlPlaneBaseMS::handleUpperMessage(cMessage *msg)
 {
+	error("unhandled message: %s (type: %s)\n", msg->getName(), msg->getClassName());
 }
 
 void ControlPlaneBaseMS::sendLowerMessage(cMessage *msg)
@@ -213,22 +220,26 @@ void ControlPlaneBaseMS::storeBSInfo(const MACAddress & BasestationID) //create 
 */
 ControlPlaneBaseMS::BSInfo* ControlPlaneBaseMS::lookupBS(const MACAddress & BasestationID)
 {
-    BasestationList::iterator it;
-    for (it = bsList.begin(); it != bsList.end(); ++it)
+    for (BasestationList::iterator it = bsList.begin(); it != bsList.end(); ++it)
+    {
         if (it->BasestationID == BasestationID)
+        {
             EV << BasestationID;
-
-    return &(*it);
+			return &(*it);
+        }
+    }
     return NULL;
 }
 
 void ControlPlaneBaseMS::clearBSList()
 {
-    BasestationList::iterator it;
-
-    for (it = bsList.begin(); it != bsList.end(); ++it)
+    for (BasestationList::iterator it = bsList.begin(); it != bsList.end(); ++it)
+    {
         if (it->authTimeoutMsg)
+        {
             delete cancelEvent(it->authTimeoutMsg);
+        }
+    }
     bsList.clear();
 }
 
@@ -372,7 +383,7 @@ void ControlPlaneBaseMS::receiveChangeNotification(int category, const cPolymorp
         //RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
         RadioState *newRadioState = check_and_cast<RadioState *>(details);
         //EV << "** Radio state update in " << className() << ":info " << details->info() << ":state " << newRadioState.getState() << ":R "<< newRadioState.getRadioId()<< "\n";
-        EV << "** Radio state update in " << getClassName() << ":state " << 
+        EV << "** Radio state update in " << getClassName() << ":state " <<
             newRadioState->getChannelNumber() << ":Name " << newRadioState->getRadioId() << "\n";
         // FIXME: double recording, because there's no sample hold in the gui
         //radioStateVector.record(radioState);

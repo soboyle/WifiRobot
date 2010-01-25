@@ -147,24 +147,20 @@ void ControlPlaneBasestation::initialize(int stage)
         getParentModule()->getParentModule()->getSubmodule("bsReceiver")->
         getSubmodule("cpsReceiver")->getSubmodule("cps_receiver");
 
-    if (cps_Receiver_BS = check_and_cast<CommonPartSublayerReceiver *>(module_cps_receiver))
-    {
-        cps_Receiver_BS->setConnectionMap(map_connections);
-        cps_Receiver_BS->setSubscriberList(&localeMobilestationList);
-    }
+    cps_Receiver_BS = check_and_cast<CommonPartSublayerReceiver *>(module_cps_receiver);
+	cps_Receiver_BS->setConnectionMap(map_connections);
+	cps_Receiver_BS->setSubscriberList(&localeMobilestationList);
 
     //Verbindung zu den Radio-Modulen
     cModule *module_radio_Transceiver =
         getParentModule()->getParentModule()->getSubmodule("bsTransceiver")->getSubmodule("radioTransceiver");
     EV << "Achtung RS: Name des Radio Moduls: " << module_radio_Transceiver->getName() << "\n";
-    if (transceiverRadio = check_and_cast<Ieee80216Radio *>(module_radio_Transceiver))
-        EV << "check erfolgreich: transceiverRadio = " << module_radio_Transceiver->getName() << "\n";
+    transceiverRadio = check_and_cast<Ieee80216Radio *>(module_radio_Transceiver);
 
     cModule *module_radio_Receiver =
         getParentModule()->getParentModule()->getSubmodule("bsReceiver")->getSubmodule("radioReceiver");
     EV << "Achtung RS: Name des Radio Moduls: " << module_radio_Receiver->getName() << "\n";
-    if (receiverRadio = dynamic_cast<Ieee80216Radio *>(module_radio_Receiver))
-        EV << "check erfolgreich: receiverRadio = " << module_radio_Receiver->getName() << "\n";
+    receiverRadio = check_and_cast<Ieee80216Radio *>(module_radio_Receiver);
 
     /**
      * the initial ulmap-size:
@@ -248,8 +244,6 @@ void ControlPlaneBasestation::handleMessage(cMessage *msg)
             Ieee80216GenericMacHeader *genericMacHeader =
                 check_and_cast<Ieee80216GenericMacHeader *>(msg);
             handleManagementFrame(genericMacHeader);
-
-            delete genericMacHeader;
         }
         else
         {
@@ -284,17 +278,17 @@ void ControlPlaneBasestation::handleLowerLayerMsg(cMessage *msg)
         SubType Type;
         Type = genericMacHeader->getTYPE();
 
-        if (Type.Subheader = 1)
+        if (Type.Subheader == 1)
         {
             handleManagementFrame(genericMacHeader);
         }
-        if (msg->getOwner() == this)
+        // if (msg->getOwner() == this)   // FIXME
             delete msg;
     }
     else if (dynamic_cast<Ieee80216BandwidthMacHeader *>(msg))
     {
         handleBandwidthRequest(check_and_cast<Ieee80216BandwidthMacHeader *>(msg));
-        if (msg->getOwner() == this)
+        // if (msg->getOwner() == this)   // FIXME
             delete msg;
     }
     else
@@ -780,10 +774,9 @@ void ControlPlaneBasestation::buildUL_MAP() //create DL_MAP frame
 
     // insert all IEs currently in the list
     ManagementMessage->setUlmap_ie_ListArraySize(ul_map_ie_List.size());
-    UL_MAP_InformationselementList::iterator it;
 
     int i = 0;
-    for (it = ul_map_ie_List.begin(); it != ul_map_ie_List.end(); ++it)
+    for (UL_MAP_InformationselementList::iterator it = ul_map_ie_List.begin(); it != ul_map_ie_List.end(); ++it)
     {
         ManagementMessage->setUlmap_ie_List(i, *it);
         ++i;
@@ -1030,7 +1023,7 @@ void ControlPlaneBasestation::buildScheduledIEs()
                 ServiceFlow *waiting_sf = &(map_serviceFlows->find(sfid)->second);
 
                 if (waiting_sf->state == SF_ACTIVE &&
-                    waiting_sf->link_type == ldUPLINK || waiting_sf->link_type == ldMANAGEMENT)
+                    (waiting_sf->link_type == ldUPLINK || waiting_sf->link_type == ldMANAGEMENT))
                 {
                     EV << "buildScheduledIEs(): Building UL_MAP-IE for waiting CID: "
                         << waiting_sf->CID << "(" <<
@@ -1055,7 +1048,7 @@ void ControlPlaneBasestation::buildScheduledIEs()
                 ServiceFlow *cur_sf = serviceFlowsSortedByPriority[prio].front();
                 if (cur_sf->state == SF_ACTIVE &&
                     map_servedGrants.find(cur_sf->CID) == map_servedGrants.end() &&
-                    cur_sf->link_type == ldUPLINK || cur_sf->link_type == ldMANAGEMENT)
+                    (cur_sf->link_type == ldUPLINK || cur_sf->link_type == ldMANAGEMENT))
                 {
                     EV << "buildScheduledIEs(): Building UL_MAP-IE for CID: " << cur_sf->CID << "(" <<
                         lookupLocaleMobilestationListCID(cur_sf->CID)->Primary_Management_CID << ")\n";
@@ -1074,7 +1067,7 @@ void ControlPlaneBasestation::buildScheduledIEs()
 //
 //          if ( cur_sf->state == SF_ACTIVE &&
 //              map_servedGrants.find( cur_sf->CID ) == map_servedGrants.end() &&
-//              cur_sf->link_type == ldUPLINK || cur_sf->link_type == ldMANAGEMENT )
+//              (cur_sf->link_type == ldUPLINK || cur_sf->link_type == ldMANAGEMENT ))
 //          {
 //              EV << "buildScheduledIEs(): Building UL_MAP-IE for CID: "
 //                  << cur_sf->CID << "("<< lookupLocaleMobilestationListCID(cur_sf->CID)->Primary_Management_CID <<")\n";
@@ -1768,8 +1761,10 @@ void ControlPlaneBasestation::provideStationWithServiceFlows(int primary_cid)
     }
 }
 
-management_type ControlPlaneBasestation::getManagementType(int)
+management_type ControlPlaneBasestation::getManagementType(int x)
 {
+	error("called ControlPlaneBasestation::getManagementType(%d)", x);
+	return BASIC;	// TODO //FIXME it's was an empty function
 }
 
 // used only in mobilestation, but needed for casting purposes in transceiver...

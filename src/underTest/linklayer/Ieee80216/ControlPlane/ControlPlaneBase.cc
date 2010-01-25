@@ -48,31 +48,27 @@ void ControlPlaneBase::handleMessage(cMessage * msg)
     if (msg->getArrivalGateId() == transceiverCommonGateIn)
     {
         handleHigherLayerMsg(msg);
-        return;
     }
-
-    if (msg->getArrivalGateId() == receiverCommonGateIn)
+    else if (msg->getArrivalGateId() == receiverCommonGateIn)
     {
         handleLowerLayerMsg(msg);
-        return;
     }
-
-    if (msg->isSelfMessage())
+    else if (msg->isSelfMessage())
     {
         handleSelfMsg(msg);
-        return;
     }
-
-    if (msg->getArrivalGateId() == trafficClassificationGateIn)
+    else if (msg->getArrivalGateId() == trafficClassificationGateIn)
     {
         handleClassificationCommand(check_and_cast<Ieee80216ClassificationCommand *>(msg));
-        return;
     }
-
-    if (msg->getArrivalGateId() == serviceFlowsGateIn)
+    else if (msg->getArrivalGateId() == serviceFlowsGateIn)
     {
         handleServiceFlowMessage(msg);
-        return;
+    }
+    else
+    {
+    	error("unhandled message: %s (type: %s)\n", msg->getName(), msg->getClassName());
+    	delete msg;
     }
 }
 

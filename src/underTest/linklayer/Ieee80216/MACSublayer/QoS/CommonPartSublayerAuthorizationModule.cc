@@ -63,6 +63,11 @@ bool CommonPartSublayerAuthorizationModule::checkQoSParams(sf_QoSParamSet *req_p
     case BE:
         return false;
         break;
+
+    case ERTPS:
+    case MANAGEMENT:
+    default:
+    	error("Unknown value: %s", getTypeOfServiceFlow(req_params));
     }
 
     updateDisplay();
@@ -88,8 +93,7 @@ void CommonPartSublayerAuthorizationModule::setAvailableDownlinkDatarate(int dat
     availableDatarate[ldDOWNLINK] = datarate;
 }
 
-ip_traffic_types CommonPartSublayerAuthorizationModule::getTypeOfServiceFlow(sf_QoSParamSet *
-                                                                             req_params)
+ip_traffic_types CommonPartSublayerAuthorizationModule::getTypeOfServiceFlow(sf_QoSParamSet *req_params)
 {
     int max_sustained_traffic_rate = req_params->max_sustained_traffic_rate;
     int min_reserved_traffic_rate = req_params->min_reserved_traffic_rate;
@@ -102,7 +106,7 @@ ip_traffic_types CommonPartSublayerAuthorizationModule::getTypeOfServiceFlow(sf_
         min_reserved_traffic_rate == max_sustained_traffic_rate && tolerated_jitter > 0)
         return UGS;
     else if (max_sustained_traffic_rate > 0 &&
-             min_reserved_traffic_rate<max_sustained_traffic_rate && max_latency>0)
+             min_reserved_traffic_rate < max_sustained_traffic_rate && max_latency > 0)
         return RTPS;
 // else if ( max_sustained_traffic_rate > 0 &&
 //    min_reserved_traffic_rate < max_sustained_traffic_rate &&
@@ -113,6 +117,8 @@ ip_traffic_types CommonPartSublayerAuthorizationModule::getTypeOfServiceFlow(sf_
         return NRTPS;
     else if (min_reserved_traffic_rate == 0 && max_sustained_traffic_rate == 0 && max_latency == 0)
         return BE;
+    else
+    	error("Unknown type");
 }
 
 void CommonPartSublayerAuthorizationModule::updateDisplay()
