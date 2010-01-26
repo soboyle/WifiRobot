@@ -24,6 +24,7 @@
 #include <vector>
 #include <omnetpp.h>
 #include "UDPAppBase.h"
+#include "MMapBoard.h"
 #include <map>
 
 /**
@@ -53,6 +54,8 @@ class INET_API UDPBasicBurst : public UDPAppBase
     IPvXAddress destAddr;
     bool isSink;
     bool offDisable;
+    MMapBoard *mmap;
+    int * numShare;
 
 
     static int counter; // counter for generating a global number for each packet
@@ -76,7 +79,7 @@ class INET_API UDPBasicBurst : public UDPAppBase
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 public:
-	UDPBasicBurst(){pktDelay = new cStdDev("burst pkt delay");}
+	UDPBasicBurst(){pktDelay = new cStdDev("burst pkt delay");numShare=NULL;}
 	~UDPBasicBurst(){if (pktDelay) delete pktDelay; if (timerNext.isScheduled()) cancelEvent(&timerNext);}
 };
 

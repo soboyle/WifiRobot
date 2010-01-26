@@ -24,7 +24,6 @@
 #include "IPAddressResolver.h"
 
 
-
 Define_Module(UDPBasicBurst);
 
 int UDPBasicBurst::counter;
@@ -153,6 +152,16 @@ void UDPBasicBurst::initialize(int stage)
         scheduleAt(0, &timerNext);
     else
         scheduleAt(par("time_begin"), &timerNext);
+    mmap = MMapBoardAccess().getIfExists();
+    if (mmap)
+    {
+    	std::string name= "UDPBasicBurst";
+    	int size = sizeof(int)*2;
+    	numShare = (int*) mmap->mmap(name,&size);
+    	numShare[0] = numShare[1]=0;
+        WATCH(numShare[0]);
+        WATCH(numShare[1]);
+    }
 }
 
 IPvXAddress UDPBasicBurst::chooseDestAddr()
@@ -184,6 +193,8 @@ void UDPBasicBurst::sendPacket()
     IPvXAddress destAddr = chooseDestAddr();
     sendToUDP(payload, localPort, destAddr, destPort);
     numSent++;
+    if (numShare)
+    	numShare[0]++;
 }
 
 
@@ -281,6 +292,8 @@ void UDPBasicBurst::processPacket(cPacket *msg)
     delete msg;
 
     numReceived++;
+    if (numShare)
+    	numShare[1]++;
 }
 
 
@@ -306,6 +319,8 @@ void UDPBasicBurst::generateBurst()
 	payload->setTimestamp();
 	sendToUDP(payload, localPort, destAddr, destPort);
 	numSent++;
+    if (numShare)
+    	numShare[0]++;
 	// Next pkt
 	nextPkt +=  par("messageFreq");
 	if (nextPkt>timeBurst && activeBurst)
