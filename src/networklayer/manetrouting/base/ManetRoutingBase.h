@@ -211,6 +211,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable
 // Check if the address is local
 		virtual bool isIpLocalAddress (const IPAddress& dest) const;
 		virtual bool isLocalAddress (const Uint128& dest) const;
+// Check if the address is multicast
+		virtual bool isMulticastAddress (const Uint128& dest) const;
 
 ///////////////
 // wlan Interface access routines

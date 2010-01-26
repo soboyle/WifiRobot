@@ -236,6 +236,16 @@ bool ManetRoutingBase::isLocalAddress (const Uint128& dest) const
 	return false;
 }
 
+bool ManetRoutingBase::isMulticastAddress (const Uint128& dest) const
+{
+	if (!isRegistered)
+		opp_error("Manet routing protocol is not register");
+	if (mac_layer_)
+		return dest.getMACAddress()==MACAddress::BROADCAST_ADDRESS;
+	else
+		return dest.getIPAddress()==IPAddress::ALLONES_ADDRESS;
+}
+
 void ManetRoutingBase::linkLayerFeeback()
 {
 	if (!isRegistered)
