@@ -6,20 +6,18 @@
 
 Define_Module(CommonPartSublayerQoSAP);
 
-
-CommonPartSublayerQoSAP::CommonPartSublayerQoSAP() {
-	
+CommonPartSublayerQoSAP::CommonPartSublayerQoSAP()
+{
 }
 
-CommonPartSublayerQoSAP::~CommonPartSublayerQoSAP() {
-	
+CommonPartSublayerQoSAP::~CommonPartSublayerQoSAP()
+{
 }
 
-void CommonPartSublayerQoSAP::initialize() {
-
-	
+void CommonPartSublayerQoSAP::initialize()
+{
 }
 
-void CommonPartSublayerQoSAP::handleMessage( cMessage *msg ) {
-	
+void CommonPartSublayerQoSAP::handleMessage(cMessage *msg)
+{
 }

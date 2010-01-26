@@ -15,17 +15,16 @@ class INET_API WiMAXPathLossReceptionModel : public IReceptionModel
   public:
     cOutVector normalVector;
     cOutVector logNormalVector;
+
     /**
      * Parameters read from the radio module: pathLossAlpha.
      */
-    virtual void initializeFrom(cModule *radioModule);
+    virtual void initializeFrom(cModule* radioModule);
 
     /**
      * Perform the calculation.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
-
 };
 
 #endif
-

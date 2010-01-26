@@ -3,13 +3,12 @@ package inet.examples.wireless.WiMAXHandover;
 // Roland Siedlaczek
 //
 
-
-import inet.examples.wireless.WiMAXHandover.Bild;
-import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.underTest.nodes.WiMAX.WiMAXAP;
+import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.world.ChannelControl;
 
-module HandoverNetworkThreeBS
+
+network HandoverNetworkThreeBS
 {
     parameters:
         double playgroundSizeX;
@@ -40,9 +39,3 @@ module HandoverNetworkThreeBS
         }
     connections allowunconnected:
 }
-
-//network HandoverNetworkThreeBS extends HandoverNetworkThreeBS
-//{
-//    parameters:
-//}
-

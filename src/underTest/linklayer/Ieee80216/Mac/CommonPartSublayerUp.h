@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -11,11 +10,10 @@
  * Point-to-point interface module. While one frame is transmitted,
  * additional frames get queued up; see NED file for more info.
  */
-class CommonPartSublayerUp: public cSimpleModule
+class CommonPartSublayerUp : public cSimpleModule
 {
-
   private:
-    cGate *gateToWatch;
+    cGate * gateToWatch;
 
     cQueue queue;
     cMessage *endTransmissionEvent;
@@ -28,11 +26,9 @@ class CommonPartSublayerUp: public cSimpleModule
   protected:
     void initialize();
 
-    void handleMessage(cPacket *msg);
+    void handleMessage(cMessage *msg);
     void handleCommand(int msgkind, cPolymorphic *ctrl);
 
     void handleLowerMsg(cPacket *msg);
     void handleMacFrameType(Ieee80216MacHeader *MacFrame);
 };
-
-

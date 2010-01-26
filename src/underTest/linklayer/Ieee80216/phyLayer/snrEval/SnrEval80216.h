@@ -1,5 +1,4 @@
 
-
 #ifndef SNR_EVAL_80216_H
 #define SNR_EVAL_80216_H
 
@@ -60,13 +59,13 @@ class INET_API SnrEval80216 : public BasicSnrEval
     virtual ~SnrEval80216();
 
   protected:
-    void handleMessage(cMessage *msg);
+    void handleMessage(cMessage* msg);
 
     virtual void handleUpperMsg(AirFrame*);
 
     virtual void handleSelfMsg(cMessage*);
 
-    virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
+    virtual void handleCommand(int msgkind, cPolymorphic* ctrl);
 
     /** @brief Buffer the frame and update noise levels and snr information */
     virtual void handleLowerMsgStart(AirFrame*);
@@ -77,35 +76,40 @@ class INET_API SnrEval80216 : public BasicSnrEval
     /** @brief Calculates the power with which a packet is received.*/
     double calcRcvdPower(double pSend, double distance);
 
-    double wimaxcalcRcvdPower(double pSend, double distance);//mit WiMAX Kanalmodell
+    double wimaxcalcRcvdPower(double pSend, double distance); //mit WiMAX Kanalmodell
 
-    double wimaxbcalcRcvdPower(double pSend, double distance);//mit WiMAX Kanalmodell
+    double wimaxbcalcRcvdPower(double pSend, double distance); //mit WiMAX Kanalmodell
 
     /** Redefined from BasicSnrEval */
-    virtual int getChannelNumber() const  {return rs.getChannelNumber();}
+    virtual int getChannelNumber() const
+    {
+        return rs.getChannelNumber();
+    }
 
-    /** @brief updates the snr information of the relevant AirFrames*/
+    /** @brief updates the snr information of the relevant AirFrames */
     void addNewSnr();
 
   protected:
     /** @brief Enum to store self message kind()s*/
-    enum
-      {
-        /** @brief timer to indicate that a message is completely sent now*/
+    enum {
+        /** @brief timer to indicate that a message is completely sent now */
         TRANSM_OVER
-      };
+    };
 
     /**
      * @brief Struct to store a pointer to the message, rcvdPower AND a
      * SnrList, needed in SnrEval::addNewSnr
      */
-    struct SnrStruct {
-      /** @brief Pointer to the message this information belongs to*/
-      AirFrame* ptr;
-      /** @brief Received power of the message*/
-      double rcvdPower;
-      /** @brief Snr list to store the SNR values*/
-      SnrList sList;
+    struct SnrStruct
+    {
+        /** @brief Pointer to the message this information belongs to */
+        AirFrame *ptr;
+
+        /** @brief Received power of the message */
+        double rcvdPower;
+
+        /** @brief Snr list to store the SNR values */
+        SnrList sList;
     };
 
     /**
@@ -119,7 +123,7 @@ class INET_API SnrEval80216 : public BasicSnrEval
      * @brief Typedef used to store received messages together with
      * receive power.
      */
-    typedef std::map<AirFrame*,double> RecvBuff;
+    typedef std::map<AirFrame*, double> RecvBuff;
 
     /**
      * @brief State: A buffer to store a pointer to a message and the related
@@ -175,4 +179,3 @@ class INET_API SnrEval80216 : public BasicSnrEval
 };
 
 #endif
-

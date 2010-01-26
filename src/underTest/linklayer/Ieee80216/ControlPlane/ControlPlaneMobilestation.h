@@ -23,23 +23,14 @@
 #include "ChannelControl.h"
 //#include "SnrEval80216.h" //Fehlermeldlung mit BasicSnrEval
 
-class ControlPlaneMobilestation: public ControlPlaneBase
+class ControlPlaneMobilestation : public ControlPlaneBase
 {
-
-public:
-
-
-
-
-public:
-
-
-
+  public:
     //MobileSubStationInfo
-    structMobilestationInfo localMobilestationInfo;// MobileSubStation
-    structMobilestationInfo activeMobilestationInfo;// MobileSubStation
-    structMobilestationInfo targetMobilestationInfo;// MobileSubStation
-    structMobilestationInfo scanningMobilestationInfo;// MobileSubStation
+    structMobilestationInfo localMobilestationInfo; // MobileSubStation
+    structMobilestationInfo activeMobilestationInfo; // MobileSubStation
+    structMobilestationInfo targetMobilestationInfo; // MobileSubStation
+    structMobilestationInfo scanningMobilestationInfo; // MobileSubStation
     /**
      * @name BasestationList
      * Die Liste enthälte Parameter von allen gescänten Basisstationen
@@ -47,16 +38,15 @@ public:
 
     BasestationList bsList;
 
-//Liste zum abspeichern der Signalstärke empfangener Pakete
+    //Liste zum abspeichern der Signalstärke empfangener Pakete
     typedef std::list<double> SNRList;
     SNRList SNRQueue;
 
     typedef std::list<double> scanSNRList;
     scanSNRList scanSNRQueue;
-	// information about the bandwidth available for the SS
-	// in Byte/s
-	//int granted_bandwidth;
-
+    // information about the bandwidth available for the SS
+    // in Byte/s
+    //int granted_bandwidth;
 
     /**
      * @name Vector
@@ -117,30 +107,29 @@ public:
     cStdDev HandoverDone;
     cStdDev scanBStrue;
     cStdDev scanBSFrameCounter;
-private:
 
-//	enum msManagementCIDState {
-//		MCID_ACTIVE,
-//		MCID_INACTIVE
-//	};
+  private:
+    // enum msManagementCIDState {
+    //  MCID_ACTIVE,
+    //  MCID_INACTIVE
+    // };
 
-	CommonPartSublayerServiceFlows_MS *cpsSF_MS;
-	CommonPartSublayerScheduling *cps_scheduling; // pointer to the scheduling module
+    CommonPartSublayerServiceFlows_MS *cpsSF_MS;
+    CommonPartSublayerScheduling *cps_scheduling; // pointer to the scheduling module
 
+    CommonPartSublayerReceiver *cps_Receiver_MS; //Für die Übertragung der CID-MAP
 
-	CommonPartSublayerReceiver *cps_Receiver_MS;//Für die Übertragung der CID-MAP
+    //UplinkDatarateMap map_currentDatarates; // current datarates per CID
 
-	//UplinkDatarateMap map_currentDatarates; // current datarates per CID
+    bool isPrimaryConnectionActive;
 
-	bool isPrimaryConnectionActive;
+    int cur_floor, last_floor;
+    double uplink_rate, downlink_rate;
+    int grants_per_second;
 
-	int cur_floor, last_floor;
-	double uplink_rate, downlink_rate;
-	int grants_per_second;
+    bool scan_request_sent;
 
-	bool scan_request_sent;
-
-protected:
+  protected:
     /** @name Timer messages */
 
     cMessage *ScanChannelTimer;
@@ -162,20 +151,19 @@ protected:
     cMessage *startRangingRequest;
 
     //scanmodus Timer
-    cMessage *scanDurationTimer;// for x frame go to scan modus
-    cMessage *interleavingIntervalTimer;//for x frame back to
-    cMessage *scanIterationTimer;// wiederhole den scanmodus
-    cMessage *startFrameTimer;// after x frame start scan
-    cMessage *startScanTimer;//
-    cMessage *startHandoverScan;//
+    cMessage *scanDurationTimer; // for x frame go to scan modus
+    cMessage *interleavingIntervalTimer; //for x frame back to
+    cMessage *scanIterationTimer; // wiederhole den scanmodus
+    cMessage *startFrameTimer;  // after x frame start scan
+    cMessage *startScanTimer;   //
+    cMessage *startHandoverScan; //
     cMessage *startHandover;
 
     cMessage *MSHO_REQ_Fail;
 
     cMessage *msgPuffer;
 
-
-protected:
+  protected:
 //Ranging Variable
     bool isRangingIntervall;
     int counterRangingUL_MAP_IE;
@@ -184,7 +172,6 @@ protected:
     int Use_ULMap;
     int rangingVersuche;
     int anzahlVersuche;
-
 
   protected:
 //Scanning Variable
@@ -214,54 +201,51 @@ protected:
     //double HO_ScnTime;
     //double HO_HoTime;
 
-
 //Handover Variavble
     int HandoverCounter;
 
-    int numChannels;    // number of channels in ChannelControl -- used if we're told to scan "all" channels
-    bool isAssociated;    // associated Access Point
+    int numChannels;            // number of channels in ChannelControl -- used if we're told to scan "all" channels
+    bool isAssociated;          // associated Access Point
 
     bool rahmenfolge;
     int FrameAnzahl;
 
     bool startHO_bool;
-private:
-	ConnectionMap *getConnectionMap();
-    int getBitsPerSecond( int duration );
 
+  private:
+    ConnectionMap *getConnectionMap();
+    int getBitsPerSecond(int duration);
 
-
-/**
-* @brief mainfunction
-***************************************************************************************/
-public:
+    /**
+    * @brief mainfunction
+    ***************************************************************************************/
+  public:
     ControlPlaneMobilestation();
     virtual ~ControlPlaneMobilestation();
 
-    void addToDownlinkRate( double bits );
-    void addToUplinkRate( double bits );
+    void addToDownlinkRate(double bits);
+    void addToUplinkRate(double bits);
 
     /** die 80216 ControlPlane state machine */
-	 enum State {
-	    WAITDLMAP,
-		WAITULMAP,
-		WAITDCD,
-		WAITUCD,
-		STARTRANGING,
-		WAITREGRSP,
-		WAITRNGRSP,
-		WAITSBCRSP,
-		CONNECT,
-		SCAN,
-		HANDOVER,
-	    };
+    enum State {
+        WAITDLMAP,
+        WAITULMAP,
+        WAITDCD,
+        WAITUCD,
+        STARTRANGING,
+        WAITREGRSP,
+        WAITRNGRSP,
+        WAITSBCRSP,
+        CONNECT,
+        SCAN,
+        HANDOVER,
+    };
 
     cFSM fsm;
 
     State getFsmState();
 
-
-protected:
+  protected:
     void initialize(int);
     void finish();
 
@@ -278,19 +262,17 @@ protected:
     //state machine
     void handleWithFSM(cMessage *msg);
 
-
     virtual void registerInterface();
 
     void createInitialServiceFlows();
 
-    virtual void setDataMsgQueue( Ieee80216MacHeaderFrameList *data_queue);
+    virtual void setDataMsgQueue(Ieee80216MacHeaderFrameList *data_queue);
 
     void resetStation();
 
-
-/**
-* @brief helpfunction
-***************************************************************************************/
+    /**
+    * @brief helpfunction
+    ***************************************************************************************/
 
     /**
     * @brief Funktionen zum erzeugen von Managementnachrichten
@@ -303,7 +285,7 @@ protected:
     void build_MOB_SCN_REQ();
     void build_MOB_MSHO_REQ();
 
-    void buildDSA_RSP( Ieee80216_DSA_REQ *mframe );
+    void buildDSA_RSP(Ieee80216_DSA_REQ *mframe);
     /**
     * @brief Funktionen zum verarbeiten von empfangenen Managementnachrichten
     */
@@ -321,8 +303,8 @@ protected:
 
     void handleScan();
 
-    void handleBS_DSA_REQ( Ieee80216_DSA_REQ *mframe );
-    void handleDSA_ACK( Ieee80216_DSA_ACK *mframe );
+    void handleBS_DSA_REQ(Ieee80216_DSA_REQ *mframe);
+    void handleDSA_ACK(Ieee80216_DSA_ACK *mframe);
 
     void handleScanDL_MAPFrame(cMessage *msg);
     void handleCorrectDLMAP(cMessage *msg);
@@ -330,15 +312,14 @@ protected:
     void makeHandover();
     bool isHoRspMsg(cMessage *msg);
 
-
     /**
     * @brief Funktionen
     */
 
-    void UplinkChannelBS( MACAddress& BasestationID, const int UpChannel);
+    void UplinkChannelBS(MACAddress & BasestationID, const int UpChannel);
     //void storeBSInfo(const MACAddress& BasestationID);
     void storeBSInfo(MACAddress *BasestationID, double frameSNR);
-    structBasestationInfo *lookupBS(MACAddress *BasestationID);
+    structBasestationInfo* lookupBS(MACAddress *BasestationID);
     void clearBSList();
 
     /** Prozeduren für scännen von Kanälen */
@@ -371,15 +352,15 @@ protected:
 
     void sendData();
     void stopData();
-    void sendControl(Ieee80216Prim_sendControlRequest *control_info );//Send Management Control message
-    void stopControl(Ieee80216Prim_stopControlRequest *control_info );
+    void sendControl(Ieee80216Prim_sendControlRequest *control_info); //Send Management Control message
+    void stopControl(Ieee80216Prim_stopControlRequest *control_info);
 
     void recordStartScanningMark();
     void recordStopScanningMark();
 
-public:
+  public:
     //int findMatchingServiceFlow( ip_traffic_types traffic_type );
-    virtual management_type getManagementType( int CID );
+    virtual management_type getManagementType(int CID);
     virtual station_type getStationType();
 
     bool hasUplinkGrants();
@@ -390,7 +371,6 @@ public:
     bool isHandoverDone();
     void setHandoverDone();
     void recordData(cMessage *msg);
-
 };
 
 #endif

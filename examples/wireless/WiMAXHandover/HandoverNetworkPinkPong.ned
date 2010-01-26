@@ -3,14 +3,12 @@ package inet.examples.wireless.WiMAXHandover;
 // Roland Siedlaczek
 //
 
-
-import inet.examples.wireless.WiMAXHandover.Bild;
-import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.underTest.nodes.WiMAX.WiMAXAP;
+import inet.underTest.nodes.WiMAX.WiMAXMS;
 import inet.world.ChannelControl;
 
 
-module HandoverNetworkPingPong
+network HandoverNetworkPingPong
 {
     parameters:
         double playgroundSizeX;
@@ -38,9 +36,3 @@ module HandoverNetworkPingPong
         }
     connections allowunconnected:
 }
-
-//network HandoverNetworkPingPong extends HandoverNetworkPingPong
-//{
-//    parameters:
-//}
-

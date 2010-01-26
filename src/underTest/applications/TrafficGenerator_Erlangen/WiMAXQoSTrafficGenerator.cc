@@ -1,5 +1,4 @@
 
-
 //
 // Copyright (C) 2006 Autonomic Networking Group,
 // Department of Computer Science 7, University of Erlangen, Germany
@@ -32,37 +31,42 @@ Define_Module(WiMAXQoSTrafficGenerator);
 #include "Ieee802Ctrl_m.h"
 */
 
-
 void WiMAXQoSTrafficGenerator::initialize(int aStage)
 {
-	TrafGen::initialize(aStage);
+    TrafGen::initialize(aStage);
 
-	if(0 == aStage){
-   	    mLowergateIn            = findGate("lowergateIn");
-		mLowergateOut           = findGate("lowergateOut");
+    if (0 == aStage)
+    {
+        mLowergateIn = findGate("lowergateIn");
+        mLowergateOut = findGate("lowergateOut");
 
-		// if needed, change the current traffic pattern
-		//mCurrentTrafficPattern = 0;
-		// set parameters for the traffic generator
-		//setParams(mCurrentTrafficPattern);
+        // if needed, change the current traffic pattern
+        //mCurrentTrafficPattern = 0;
+        // set parameters for the traffic generator
+        //setParams(mCurrentTrafficPattern);
 
-		mNumTrafficMsgs = 0;
+        mNumTrafficMsgs = 0;
 
-		ev << this->getName();
-        if ( strcmp( this->getName(), "trafGen_ftp" ) == 0 ) {
-                ipTrafficType = BE;
+        ev << this->getName();
+        if (strcmp(this->getName(), "trafGen_ftp") == 0)
+        {
+            ipTrafficType = BE;
         }
-        else if ( strcmp(this->getName(), "trafGen_voice_no_supr") == 0 ) {
-                ipTrafficType = UGS;
+        else if (strcmp(this->getName(), "trafGen_voice_no_supr") == 0)
+        {
+            ipTrafficType = UGS;
         }
-        else if ( strcmp(this->getName(), "trafGen_voice_supr") == 0 ) {
-                ipTrafficType = ERTPS;
+        else if (strcmp(this->getName(), "trafGen_voice_supr") == 0)
+        {
+            ipTrafficType = ERTPS;
         }
-        else if ( strcmp(this->getName(), "trafGen_guaranteed_minbw_web_access") == 0 ) {
-                ipTrafficType = NRTPS;
+        else if (strcmp(this->getName(), "trafGen_guaranteed_minbw_web_access") == 0)
+        {
+            ipTrafficType = NRTPS;
         }
-        else if ( strcmp(this->getName(), "trafGen_video_stream") == 0 ) {
-                ipTrafficType = RTPS;
+        else if (strcmp(this->getName(), "trafGen_video_stream") == 0)
+        {
+            ipTrafficType = RTPS;
         }
 
         interDepartureTime = InterDepartureTime();
@@ -70,58 +74,58 @@ void WiMAXQoSTrafficGenerator::initialize(int aStage)
 
 //        string ugs_station = par("ugs_station");
 //        if ( ugs_station.compare("") != 0 ) {
-//        	if ( ipTrafficType == ERTPS || ipTrafficType == NRTPS || ipTrafficType == RTPS )
-//        		cancelAndDelete(mpSendMessage);
+//         if ( ipTrafficType == ERTPS || ipTrafficType == NRTPS || ipTrafficType == RTPS )
+//          cancelAndDelete(mpSendMessage);
 //
-//	        if ( !(ugs_station.compare(parentModule()->name()) == 0) && ipTrafficType == UGS) {
-//	        	cancelAndDelete(mpSendMessage);
-//	        }
+//         if ( !(ugs_station.compare(parentModule()->name()) == 0) && ipTrafficType == UGS) {
+//          cancelAndDelete(mpSendMessage);
+//         }
 //        }
-	}
+    }
 
-//	srand( (unsigned)time(0) );
+// srand( (unsigned)time(0) );
 }
 
 void WiMAXQoSTrafficGenerator::finish()
 {
-	recordScalar("trafficSent", mNumTrafficMsgs);
-	recordScalar("Bitrate of generated traffic", (1/interDepartureTime * packetSize )+.5 );
+    recordScalar("trafficSent", mNumTrafficMsgs);
+    recordScalar("Bitrate of generated traffic", (1 / interDepartureTime * packetSize) + 0.5);
 }
 
-void WiMAXQoSTrafficGenerator::handleLowerMsg(cPacket* apMsg)
+void WiMAXQoSTrafficGenerator::handleLowerMsg(cPacket * apMsg)
 {
-	delete apMsg;
+    delete apMsg;
 }
 
-void WiMAXQoSTrafficGenerator::handleSelfMsg(cPacket *apMsg)
+void WiMAXQoSTrafficGenerator::handleSelfMsg(cPacket * apMsg)
 {
-	TrafGen::handleSelfMsg(apMsg);
+    TrafGen::handleSelfMsg(apMsg);
 }
 
 /** this function has to be redefined in every application derived from the
-	TrafGen class.
-	Its purpose is to translate the destination (given, for example, as "host[5]")
-	to a valid address (MAC, IP, ...) that can be understood by the next lower
-	layer.
-	It also constructs an appropriate control info block that might be needed by
-	the lower layer to process the message.
-	In the example, the messages are sent directly to a mac 802.11 layer, address
-	and control info are selected accordingly.
+    TrafGen class.
+    Its purpose is to translate the destination (given, for example, as "host[5]")
+    to a valid address (MAC, IP, ...) that can be understood by the next lower
+    layer.
+    It also constructs an appropriate control info block that might be needed by
+    the lower layer to process the message.
+    In the example, the messages are sent directly to a mac 802.11 layer, address
+    and control info are selected accordingly.
 */
-void WiMAXQoSTrafficGenerator::SendTraf(cPacket* apMsg, const char* apDest)
+void WiMAXQoSTrafficGenerator::SendTraf(cPacket * apMsg, const char *apDest)
 {
-	//apMsg->setLength(PacketSize()*8);
-	apMsg->setByteLength( PacketSize() );	// packet size in bits is more convenient
+    //apMsg->setLength(PacketSize()*8);
+    apMsg->setByteLength(PacketSize()); // packet size in bits is more convenient
 
-	IPDatagram *ip_d = new IPDatagram("ip_datagram");
-		ip_d->encapsulate( apMsg );
+    IPDatagram *ip_d = new IPDatagram("ip_datagram");
+    ip_d->encapsulate(apMsg);
 
-	Ieee80216TGControlInformation *ci = new Ieee80216TGControlInformation();
-		ci->setTraffic_type( ipTrafficType );
-		ci->setBitrate( (1/interDepartureTime * packetSize )+.5 );
-		ci->setPacketInterval( interDepartureTime );
+    Ieee80216TGControlInformation *ci = new Ieee80216TGControlInformation();
+    ci->setTraffic_type(ipTrafficType);
+    ci->setBitrate((1 / interDepartureTime * packetSize) + 0.5);
+    ci->setPacketInterval(interDepartureTime);
 
-	ip_d->setControlInfo( ci );
+    ip_d->setControlInfo(ci);
 
-	send(ip_d, mLowergateOut);
+    send(ip_d, mLowergateOut);
 }

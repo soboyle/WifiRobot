@@ -8,18 +8,15 @@
 class CommonPartSublayerControlModule : public cSimpleModule
 {
   private:
-	  
-	  int authIn, authOut, controlIn, controlOut, serviceflowIn, serviceflowOut;
-    
+    int authIn, authOut, controlIn, controlOut, serviceflowIn, serviceflowOut;
+
   public:
-	  CommonPartSublayerControlModule();
-	  virtual ~CommonPartSublayerControlModule();
-    
+    CommonPartSublayerControlModule();
+    virtual ~CommonPartSublayerControlModule();
+
   protected:
-	void initialize();
-	void handleMessage(cMessage *msg);
-	void handleUpperMessage( cMessage *msg );
-	void handleSelfMessage( cMessage *msg );
+    void initialize();
+    void handleMessage(cMessage *msg);
+    void handleUpperMessage(cMessage *msg);
+    void handleSelfMessage(cMessage *msg);
 };
-
-

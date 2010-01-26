@@ -22,9 +22,7 @@
 //#include "AirFrame_m.h"
 //#include "FWMath.h"
 
-
 Define_Module(Decider80216);
-
 
 void Decider80216::initialize(int stage)
 {
@@ -33,10 +31,8 @@ void Decider80216::initialize(int stage)
     if (stage == 0)
     {
         snrThresholdLevel = FWMath::dBm2mW(par("snrThresholdLevel"));
-
     }
 }
-
 
 /**
  *  Checks the received sduList (from the PhySDU header) if it contains an
@@ -52,58 +48,53 @@ bool Decider80216::snrOverThreshold(SnrList& snrlist) const
     {
         if (iter->snr <= snrThresholdLevel)
         {
-            EV << "Message got lost. MessageSnr: " << iter->
-                snr << " Threshold: " << snrThresholdLevel << endl;
+            EV << "Message got lost. MessageSnr: " << iter->snr << " Threshold: " <<
+                snrThresholdLevel << endl;
             return false;
         }
     }
     return true;
 }
 
-
-void Decider80216::getSnrList(AirFrame *af, SnrList& receivedList)
+void Decider80216::getSnrList(AirFrame* af, SnrList& receivedList)
 {
-	SnrListEntry listEntry;
-        listEntry = receivedList.front();
+    SnrListEntry listEntry;
+    listEntry = receivedList.front();
 
+    ChannelControl *cc;
+    ChannelControl::HostRef myHostRef;
+    cModule *hostModule = findHost();
 
-	ChannelControl *   cc;
-	ChannelControl::HostRef   myHostRef;
-        cModule *hostModule = findHost();
+    cc = dynamic_cast<ChannelControl*>(simulation.getModuleByPath("channelcontrol"));
+    myHostRef = cc->lookupHost(hostModule);
 
-	cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
-        myHostRef = cc->lookupHost(hostModule);
+    const Coord& myPos = cc->getHostPosition(myHostRef);
+    const Coord& framePos = af->getSenderPos();
+    double distance = myPos.distance(framePos);
+    EV << "Nachricht ";
+    EV << "mit dem Time: " << listEntry.time << ", ";
+    EV << "mit der Distanz: " << distance << ", ";
+    EV << "mit dem SNR: " << listEntry.snr << "\n";
 
-	const Coord& myPos = cc->getHostPosition(myHostRef);
-	const Coord& framePos = af->getSenderPos();
-	double distance = myPos.distance(framePos);
-        EV << "Nachricht ";
-	EV << "mit dem Time: " << listEntry.time <<", ";
-	EV << "mit der Distanz: " << distance <<", ";
-	EV << "mit dem SNR: " << listEntry.snr <<"\n";
+    for (cSubModIterator iter(*subParent); !iter.end(); iter++)
+    {
+        ev << "Roland Parent Module: " << iter()->getFullName() << "\n";
+    }
 
+    cModule* parent = getParentModule(); //Uebergeordnetes Module
+    cModule* subParent = parent->getParentModule(); //Übergeordnetes Module
 
-	for (cSubModIterator iter(*subParent); !iter.end(); iter++)
-	{
- 	ev << "Roland Parent Module: " << iter()->getFullName() <<"\n";
-	}
+    cModule* plane = subParent->getSubmodule("controlPlane");
+    //ControlPlaneBase *ControlPlane = check_and_cast<ControlPlaneBase *> (plane);
 
-	cModule *parent = getParentModule();//Uebergeordnetes Module
-	cModule *subParent = parent->getParentModule();//Übergeordnetes Module
-
-	cModule *plane = subParent->getSubmodule("controlPlane");
-	//ControlPlaneBase *ControlPlane = check_and_cast<ControlPlaneBase *> (plane);
-
-        //if (ControlPlane)
-	//{
-	//ControlPlane->setSNR(listEntry.snr);
-	//ControlPlane->setDistance(distance);
-	//}
-
+    //if (ControlPlane)
+    //{
+    //ControlPlane->setSNR(listEntry.snr);
+    //ControlPlane->setDistance(distance);
+    //}
 }
 
-
-void Decider80216::handleLowerMsg(AirFrame *af, SnrList& receivedList)
+void Decider80216::handleLowerMsg(AirFrame* af, SnrList& receivedList)
 {
     getSnrList(af, receivedList);
     if (snrOverThreshold(receivedList))

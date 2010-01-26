@@ -1,6 +1,4 @@
 
-
-
 #ifndef _DECIDER_80216_H
 #define _DECIDER_80216_H
 
@@ -22,11 +20,11 @@ class INET_API Decider80216 : public BasicDecider
      */
     double snrThresholdLevel;
 
-    struct SnrStruct 
+    struct SnrStruct
     {
-      cMessage* ptr;
-      double rcvdPower;
-      double simTime;
+        cMessage *ptr;
+        double rcvdPower;
+        double simTime;
     };
 
     SnrStruct snrInfo;
@@ -37,11 +35,12 @@ class INET_API Decider80216 : public BasicDecider
     cModule *subParent;
 
   protected:
-    virtual void initialize(int);
-    void getSnrList(AirFrame *af, SnrList& receivedList);
+    virtual void initialize(int stage);
+    void getSnrList(AirFrame *af, SnrList &receivedList);
+
   protected:
-    bool snrOverThreshold(SnrList &) const;
-    virtual void handleLowerMsg(AirFrame*, SnrList &);
+    bool snrOverThreshold(SnrList &list) const;
+    virtual void handleLowerMsg(AirFrame *af, SnrList &list);
 };
 
 #endif

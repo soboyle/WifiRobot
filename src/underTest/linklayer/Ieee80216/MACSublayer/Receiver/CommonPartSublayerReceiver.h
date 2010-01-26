@@ -11,13 +11,11 @@
 #include <map>
 using namespace std;
 
-
-
 /**
  * Point-to-point interface module. While one frame is transmitted,
  * additional frames get queued up; see NED file for more info.
  */
-class CommonPartSublayerReceiver: public cSimpleModule
+class CommonPartSublayerReceiver : public cSimpleModule
 {
   protected:
     /** @brief gate id*/
@@ -29,18 +27,18 @@ class CommonPartSublayerReceiver: public cSimpleModule
     int fragmentationGateOut;
 
   private:
-	ConnectionMap *map_connections;
-	MobileSubscriberStationList *msslist;
+    ConnectionMap *map_connections;
+    MobileSubscriberStationList *msslist;
 
     int eigene_CID;
 
-    int cur_floor,last_floor;
+    int cur_floor, last_floor;
     int downlink_rate;
     int downlink_daten;
 
-    cOutVector cvec_endToEndDelay[BE+1];
-    map<string, vector<cOutVector*> > map_delay_vectors;
-    map<string,double[pBE+1]> map_sums;
+    cOutVector cvec_endToEndDelay[BE + 1];
+    map<string, vector<cOutVector *> > map_delay_vectors;
+    map<string, double[pBE + 1]> map_sums;
     cOutVector cvec_downlinkUGS;
 
   public:
@@ -48,8 +46,8 @@ class CommonPartSublayerReceiver: public cSimpleModule
     virtual ~CommonPartSublayerReceiver();
 
     void setConnectionMap(ConnectionMap *pointer_ConnectionsMap);
-    void setSubscriberList(MobileSubscriberStationList *pointer_msslist);	// for BS
-    void setSubscriberList(structMobilestationInfo *mssinfo);	// for MS
+    void setSubscriberList(MobileSubscriberStationList *pointer_msslist); // for BS
+    void setSubscriberList(structMobilestationInfo *mssinfo); // for MS
 
   protected:
     void initialize();
@@ -65,10 +63,9 @@ class CommonPartSublayerReceiver: public cSimpleModule
     void handleMacFrameType(Ieee80216MacHeader *MacFrame);
 
     bool CIDInConnectionMap(int mac_pdu_CID);
-    bool isManagementCID( int mac_pdu_CID );
+    bool isManagementCID(int mac_pdu_CID);
 
     void updateDisplay();
-
 };
 
 #endif

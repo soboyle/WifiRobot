@@ -31,40 +31,35 @@
 #include "TrafGen.h"
 #include "Ieee80216Primitives_m.h"
 
-
 class WiMAXQoSTrafficGenerator : public TrafGen
 {
-public:
-
-	static bool seeded;
+  public:
+    static bool seeded;
 
     // LIFECYCLE
     // this takes care of constructors and destructors
-	//Module_Class_Members(WiMAXQoSTrafficGenerator, TrafGen, 0);
+    //Module_Class_Members(WiMAXQoSTrafficGenerator, TrafGen, 0);
 
-	virtual void initialize(int);
-	virtual void finish();
+    virtual void initialize(int);
+    virtual void finish();
 
-protected:
+  protected:
+    // OPERATIONS
+    virtual void handleSelfMsg(cPacket *);
+    virtual void handleLowerMsg(cPacket *);
 
-  // OPERATIONS
-	virtual void handleSelfMsg(cPacket*);
-	virtual void handleLowerMsg(cPacket*);
+    virtual void SendTraf(cPacket *msg, const char *dest);
 
-	virtual void SendTraf(cPacket *msg, const char *dest);
-
-private:
-
-	int mLowergateIn;
-	int mLowergateOut;
+  private:
+    int mLowergateIn;
+    int mLowergateOut;
 
     int mCurrentTrafficPattern;
 
-	double mNumTrafficMsgs;
+    double mNumTrafficMsgs;
 
-	ip_traffic_types ipTrafficType;
-	double interDepartureTime, packetSize;
-
+    ip_traffic_types ipTrafficType;
+    double interDepartureTime, packetSize;
 };
 
 #endif

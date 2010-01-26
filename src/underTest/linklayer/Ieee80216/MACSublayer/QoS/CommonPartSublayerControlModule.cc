@@ -6,22 +6,24 @@
 
 Define_Module(CommonPartSublayerControlModule);
 
-CommonPartSublayerControlModule::CommonPartSublayerControlModule() {
-
+CommonPartSublayerControlModule::CommonPartSublayerControlModule()
+{
 }
 
-CommonPartSublayerControlModule::~CommonPartSublayerControlModule() {
-
+CommonPartSublayerControlModule::~CommonPartSublayerControlModule()
+{
 }
 
-void CommonPartSublayerControlModule::initialize() {
-	authIn = findGate("authIn");
-	authOut= findGate("authOut");
-	controlIn = findGate("controlIn");
-	controlOut= findGate("controlOut");
-	serviceflowIn = findGate("serviceflowIn");
-	serviceflowOut= findGate("serviceflowOut");
+void CommonPartSublayerControlModule::initialize()
+{
+    authIn = findGate("authIn");
+    authOut = findGate("authOut");
+    controlIn = findGate("controlIn");
+    controlOut = findGate("controlOut");
+    serviceflowIn = findGate("serviceflowIn");
+    serviceflowOut = findGate("serviceflowOut");
 }
 
-void CommonPartSublayerControlModule::handleMessage( cMessage *msg ) {
+void CommonPartSublayerControlModule::handleMessage(cMessage *msg)
+{
 }

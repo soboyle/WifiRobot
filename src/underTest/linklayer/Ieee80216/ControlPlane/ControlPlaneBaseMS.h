@@ -9,33 +9,27 @@
 #include "NotificationBoard.h"
 #include "ControlPlaneMS.h"
 
-
-
-class ControlPlaneBaseMS:public cSimpleModule, public ControlPlaneMS, public INotifiable
+class ControlPlaneBaseMS : public cSimpleModule, public ControlPlaneMS, public INotifiable
 {
- public:
-
-
+  public:
 /**
 * @name Struct ScanningInfo
 * Informationen abspeicher die für den Scan benötigt werden
 */
     struct ScanningInfo
     {
-        MACAddress BSID; // specific BSID to scan for provider
-
-        bool activeScan;  // whether to perform active or passive scanning
+        MACAddress BSID;        // specific BSID to scan for provider
+        bool activeScan;        // whether to perform active or passive scanning
         std::vector<int> channelList; // list of channels to scan
         int currentChannelIndex; // index into channelList[]
-	int scanChannel;
+        int scanChannel;
         bool busyChannelDetected; // during minChannelTime, we have to listen for busy channel
-        double minChannelTime; // minimum time to spend on each channel when scanning
-        double maxChannelTime; // maximum time to spend on each channel when scanning
-	bool recieve_DL_MAP;
-	bool recieve_DCD;
-	bool recieve_UCD;
+        double minChannelTime;  // minimum time to spend on each channel when scanning
+        double maxChannelTime;  // maximum time to spend on each channel when scanning
+        bool recieve_DL_MAP;
+        bool recieve_DCD;
+        bool recieve_UCD;
     };
-
 
 /**
 * @name Structur Basestation
@@ -44,17 +38,15 @@ class ControlPlaneBaseMS:public cSimpleModule, public ControlPlaneMS, public INo
     struct BSInfo
     {
         MACAddress BasestationID;
-	int DownlinkChannel; 
+        int DownlinkChannel;
         int UplinkChannel;
         cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
-	//
+        //
         //BSInfo() {
         //    channel=-1;
-	//	authTimeoutMsg=NULL;
+        // authTimeoutMsg=NULL;
         //}
     };
-
-
 
     /**
      * @name BasestationList
@@ -66,34 +58,28 @@ class ControlPlaneBaseMS:public cSimpleModule, public ControlPlaneMS, public INo
     cMessage *ScanChannelTimer;
     cMessage *DLMAPTimer;
 
-public:
- MobileSubStationInfo MSInfo;
-
+  public:
+    MobileSubStationInfo MSInfo;
     NotificationBoard *nb;
 
-
-
-
-
   protected:
-
     // number of channels in ChannelControl -- used if we're told to scan "all" channels
     int numChannels;
 
     // scanning status
     bool isScanning;
     ScanningInfo scanning;
+
     // associated Access Point
     bool isAssociated;
-    cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
+
+    cMessage *assocTimeoutMsg;  // if non-NULL: association is in progress
 
     /** Physical radio (medium) state copied from physical layer */
     RadioState::State radioState;
 
-
-    private:
-    cGate *gateToWatch;
-
+  private:
+    cGate * gateToWatch;
     cQueue queue;
     cMessage *endTransmissionEvent;
 
@@ -118,9 +104,9 @@ public:
     void sendLowerMessage(cMessage *msg);
 
     /** Prozeduren für abspeichern von BS */
-    void storeBSInfo(const MACAddress& BasestationID);
-    void UplinkChannelBS(const MACAddress& BasestationID, const int UpChannel);
-    BSInfo *lookupBS(const MACAddress& BasestationID);
+    void storeBSInfo(const MACAddress & BasestationID);
+    void UplinkChannelBS(const MACAddress & BasestationID, const int UpChannel);
+    BSInfo *lookupBS(const MACAddress & BasestationID);
     void clearBSList();
 
     /** Prozeduren für scännen von Kanälen */
@@ -138,6 +124,5 @@ public:
     void handle_REG_RSP_Frame(Ieee80216_REG_RSP *frame);
 
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cPolymorphic * details);
-
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 };

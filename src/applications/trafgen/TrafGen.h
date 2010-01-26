@@ -84,57 +84,52 @@ Nodes sending no traffic can be achieved by two methods:
 
 class TrafGen : public cSimpleModule
 {
-public:
-	// LIFECYCLE
-	// this takes care of constructors and destructors
+  public:
+    // LIFECYCLE
+    // this takes care of constructors and destructors
+    virtual void initialize(int);
+    virtual void finish();
 
-	virtual void initialize(int);
-	virtual void finish();
+    // OPERATIONS
+    virtual void handleMessage(cMessage *);
+    double FirstPacketTime();
+    double InterDepartureTime();
+    long PacketSize();
 
-	// OPERATIONS
-	virtual void handleMessage(cMessage*);
-	double  FirstPacketTime();
-	double  InterDepartureTime();
-	long    PacketSize();
+    enum TrafficStateType {
+        TRAFFIC_ON,
+        TRAFFIC_OFF
+    };
 
-	enum TrafficStateType
-	{
-	    TRAFFIC_ON,
-	    TRAFFIC_OFF
-	};
+  protected:
+    // OPERATIONS
+    virtual void handleSelfMsg(cMessage*);
+    virtual void handleLowerMsg(cPacket*);
 
-protected:
+    virtual void SendTraf(cPacket*, const char*) = 0;
+    virtual void setParams(int);
+    std::string calculateDestination();
 
-	// OPERATIONS
-	virtual void handleSelfMsg(cMessage*);
-	virtual void handleLowerMsg(cPacket*);
+  private:
+    // MEMBER VARIABLES
+    cDynamicExpression mPacketSize;
+    cDynamicExpression mInterDepartureTime;
+    cDynamicExpression mFirstPacketTime;
+    std::string mDestination;
+    cDynamicExpression mOnIntv;
+    cDynamicExpression mOffIntv;
+    cDynamicExpression mOffInterDepartureTime;
 
-	virtual void SendTraf(cPacket*, const char*) = 0;
-	virtual void setParams(int);
-	std::string calculateDestination();
+    bool mOffTraffic;
+    bool mOnIdenticalDest;
+    bool mOnOff;
 
-private:
+    std::string mCurrentOnDest;
 
-	// MEMBER VARIABLES
-	cDynamicExpression        mPacketSize;
-	cDynamicExpression        mInterDepartureTime;
-	cDynamicExpression        mFirstPacketTime;
-	std::string               mDestination;
-	cDynamicExpression        mOnIntv;
-	cDynamicExpression        mOffIntv;
-	cDynamicExpression        mOffInterDepartureTime;
+    cMessage *mpSendMessage;
+    cMessage *mpOnOffSwitch;
 
-	bool           mOffTraffic;
-	bool           mOnIdenticalDest;
-	bool           mOnOff;
-
-	std::string    mCurrentOnDest;
-
-	cMessage*      mpSendMessage;
-	cMessage*      mpOnOffSwitch;
-
-	int            mDefaultTrafConfigId;
-
+    int mDefaultTrafConfigId;
 };
 
 #endif

@@ -23,16 +23,13 @@ class ConvergenceSublayerControlModule : public cSimpleModule
     int fragIn, fragOut;
     int compIn, compOut;
 
-
   public:
-	  ConvergenceSublayerControlModule();
+    ConvergenceSublayerControlModule();
     virtual ~ConvergenceSublayerControlModule();
 
   protected:
     void initialize();
-    void handleMessage(cPacket *msg);
-    void handleUpperLayerMessage( cPacket *msg );
-    void handleSelfMessage( cMessage *msg );
+    void handleMessage(cMessage *msg);
+    void handleUpperLayerMessage(cPacket *msg);
+    void handleSelfMessage(cMessage *msg);
 };
-
-

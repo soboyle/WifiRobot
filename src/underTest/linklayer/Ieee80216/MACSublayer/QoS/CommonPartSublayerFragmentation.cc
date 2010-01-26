@@ -5,13 +5,12 @@
 
 Define_Module(CommonPartSublayerFragmentation);
 
-
-CommonPartSublayerFragmentation::CommonPartSublayerFragmentation() {
-
+CommonPartSublayerFragmentation::CommonPartSublayerFragmentation()
+{
 }
 
-CommonPartSublayerFragmentation::~CommonPartSublayerFragmentation() {
-
+CommonPartSublayerFragmentation::~CommonPartSublayerFragmentation()
+{
 }
 
 /**
@@ -21,30 +20,33 @@ CommonPartSublayerFragmentation::~CommonPartSublayerFragmentation() {
  *
  */
 
-
-void CommonPartSublayerFragmentation::initialize() {
-	commonPartGateOut = findGate("commonPartGateOut");
-	commonPartGateIn = findGate("commonPartGateIn");
-	securityGateIn = findGate("securityGateIn");
-	securityGateOut = findGate("securityGateOut");
+void CommonPartSublayerFragmentation::initialize()
+{
+    commonPartGateOut = findGate("commonPartGateOut");
+    commonPartGateIn = findGate("commonPartGateIn");
+    securityGateIn = findGate("securityGateIn");
+    securityGateOut = findGate("securityGateOut");
 }
 
-void CommonPartSublayerFragmentation::handleMessage( cMessage *msg ) {
-	EV << "(in handleMessage) message "<<msg->getName()<<" eingetroffen an fragmentation.\n";
-	//higher layer message in transceiver
-	if ( msg->getArrivalGateId() == commonPartGateIn ) {
-		EV << "von commonPartGateIn "<<msg<<" an securityGateOut gesendet.\n";
-		send(msg, securityGateOut);
-	}
-	//lower layer message in receiver
-	else if ( msg->getArrivalGateId() == securityGateIn ) {
-		EV << "von securityGateIn "<<msg<<" an commonPartGateOut gesendet.\n";
-		send(msg, commonPartGateOut);
-	}
-	//higher layer message in receiver
-	else if ( msg->getArrivalGateId() == commonPartGateIn ) {
-		EV << "von commonPartGateIn "<<msg<<" an securityGateOut gesendet.\n";
-		send(msg, securityGateOut);
-	}
-
+void CommonPartSublayerFragmentation::handleMessage(cMessage *msg)
+{
+    EV << "(in handleMessage) message " << msg->getName() << " eingetroffen an fragmentation.\n";
+    //higher layer message in transceiver
+    if (msg->getArrivalGateId() == commonPartGateIn)
+    {
+        EV << "von commonPartGateIn " << msg << " an securityGateOut gesendet.\n";
+        send(msg, securityGateOut);
+    }
+    //lower layer message in receiver
+    else if (msg->getArrivalGateId() == securityGateIn)
+    {
+        EV << "von securityGateIn " << msg << " an commonPartGateOut gesendet.\n";
+        send(msg, commonPartGateOut);
+    }
+    //higher layer message in receiver
+    else if (msg->getArrivalGateId() == commonPartGateIn)
+    {
+        EV << "von commonPartGateIn " << msg << " an securityGateOut gesendet.\n";
+        send(msg, securityGateOut);
+    }
 }

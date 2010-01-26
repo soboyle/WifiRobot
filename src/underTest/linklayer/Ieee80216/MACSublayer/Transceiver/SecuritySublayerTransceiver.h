@@ -3,28 +3,23 @@
 #include <string.h>
 #include <omnetpp.h>
 
-
 /**
  * Point-to-point interface module. While one frame is transmitted,
  * additional frames get queued up; see NED file for more info.
  */
-class SecuritySublayerTransceiver: public cSimpleModule
+class SecuritySublayerTransceiver : public cSimpleModule
 {
-
- private:
+  private:
     int commonPartGateIn;
     int commonPartGateOut;
     int transceiverRadioGateIn;
     int transceiverRadioGateOut;
 
- public:
+  public:
     SecuritySublayerTransceiver();
     virtual ~SecuritySublayerTransceiver();
 
- protected:
+  protected:
     void initialize();
     void handleMessage(cMessage *msg);
-
 };
-
-

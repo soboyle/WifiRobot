@@ -11,17 +11,15 @@
 class CommonPartSublayerQoSAP : public cSimpleModule
 {
   private:
-	  IInterfaceTable *itable;
-    
+    IInterfaceTable *itable;
+
   public:
-	  CommonPartSublayerQoSAP();
+    CommonPartSublayerQoSAP();
     virtual ~CommonPartSublayerQoSAP();
-    
+
   protected:
     void initialize();
     void handleMessage(cMessage *msg);
-    void handleUpperMessage( cMessage *msg );
-    void handleSelfMessage( cMessage *msg );
+    void handleUpperMessage(cMessage *msg);
+    void handleSelfMessage(cMessage *msg);
 };
-
-

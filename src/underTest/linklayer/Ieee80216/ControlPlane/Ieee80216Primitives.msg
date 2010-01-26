@@ -1,43 +1,22 @@
 //
 // Required for MACAddress declarations
 //
+
 cplusplus {{
 #include "MACAddress.h"
 #include "Ieee80216MacHeader_m.h"
 #include "global_enums.h"
 }}
 
-
-
-
 class noncobject MACAddress;
-
-
-
-
-
-
 
 enum ip_traffic_types;
 
-
-
-
 enum sf_state;
-
-
-
 
 struct sf_QoSParamSet;
 
-
-
-
 struct structMobilestationInfo;
-
-
-
-
 
 // ControlInfo for WiMAXQoSTrafficGenerator
 message Ieee80216TGControlInformation
@@ -50,7 +29,6 @@ message Ieee80216TGControlInformation
 // Command message sent by the TrafficClassificationModule to the ControlPlane
 enum request_types
 {
-
     DSA = 0;
     DSC = 1;
     DSD = 2;
@@ -74,7 +52,6 @@ message Ieee80216FlushCommand
 
 enum Ieee80216PrimRequestCode
 {
-
     RC_DATA_REQUEST = 1;
 }
 
@@ -86,7 +63,6 @@ enum Ieee80216PrimRequestCode
 //
 enum Ieee80216PrimResultCode
 {
-
     PRC_SUCCESS = 0;
 }
 
@@ -109,7 +85,7 @@ message Ieee80216PrimConfirm
     int resultCode enum(Ieee80216PrimResultCode);
 }
 //
-// 
+//
 // Losely based on MLME-SCAN.request.
 //
 message Ieee80216Prim_ScanRequest extends Ieee80216PrimRequest
@@ -128,15 +104,14 @@ message Ieee80216Prim_BSSDescription
     double rxPower;
 }
 
-
 //
 message Ieee80216Prim_sendControlRequest extends Ieee80216PrimRequest
 {
     //bool is_broadcast;
-    int pduCID;		// CID for uplink grant (according to standard)
+    int pduCID;         // CID for uplink grant (according to standard)
     double timeInterval;
     int bits_for_burst;
-    int realCID;	// helper variable for packing mechanism (non-standard)
+    int realCID;        // helper variable for packing mechanism (non-standard)
 }
 
 message Ieee80216Prim_stopControlRequest extends Ieee80216PrimRequest
@@ -146,7 +121,7 @@ message Ieee80216Prim_stopControlRequest extends Ieee80216PrimRequest
     double timeInterval;
 }
 //
-// 
+//
 //
 message Ieee80216Prim_sendDataRequest extends Ieee80216PrimRequest
 {
@@ -171,5 +146,5 @@ message Ieee80216Prim_BasicCID extends Ieee80216PrimRequest
 message Ieee80216Prim_ScanMS
 {
     MACAddress scanMobilestationAddress;
-    	//structMobilestationInfo scanMobilestationInfo;
+    //structMobilestationInfo scanMobilestationInfo;
 }
