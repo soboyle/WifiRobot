@@ -38,6 +38,9 @@ double TwoRayModel::calculateReceivedPower(double pSend, double carrierFrequency
 {
     double numerator = pSend * receiverAntennaGain * pow(ht,2) * pow(hr,2);
     double denominator = pow(distance, 4) * systemLoss;
-    return (numerator/denominator);
+    double prec = (numerator/denominator);
+    if (prec > pSend)
+    	prec = pSend;
+    return prec;
 }
 

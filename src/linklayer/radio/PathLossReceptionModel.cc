@@ -34,6 +34,9 @@ double PathLossReceptionModel::calculateReceivedPower(double pSend, double carri
 {
     const double speedOfLight = 300000000.0;
     double waveLength = speedOfLight / carrierFrequency;
-    return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
+    double prec = (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
+    if (prec > pSend)
+    	prec= pSend;
+    return prec;
 }
 

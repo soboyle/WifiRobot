@@ -42,7 +42,11 @@ double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, 
     double x = normal(0, 1);
     double y = normal(0, 1);
     double rr = c*( (x + sqrt(2*K))*(x + sqrt(2*K)) + y*y);
-    return freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha) * rr;
+    double prec = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha) * rr;
+    if (prec > pSend)
+    	prec = pSend;
+    return prec;
+
 
 }
 

@@ -77,7 +77,10 @@ double TwoRayGroundModel::calculateReceivedPower(double pSend, double carrierFre
 	 * The original equation in Rappaport's book assumes L = 1.
 	 */
 
-	return ((pSend * Gt * Gr * (ht * ht * hr * hr) ) / (distance * distance * distance * distance * L));
+    double prec = ((pSend * Gt * Gr * (ht * ht * hr * hr) ) / (distance * distance * distance * distance * L));
+    if (prec > pSend)
+    	prec = pSend;
+    return prec;
 
     };
 

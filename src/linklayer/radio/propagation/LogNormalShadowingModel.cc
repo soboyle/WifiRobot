@@ -54,6 +54,9 @@ double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carr
     //EV << "dist " << distance << " avg_power " << f2db(avg->power(distance, Pt)) << " lns_power " << Prx_db << endl;
 
     // convert dBm to mW
-    return pow(10, Prx_db/10.0);
+    double prec = pow(10, Prx_db/10.0);
+    if (prec > pSend)
+    	prec = pSend;
+    return prec;
 }
 

@@ -41,5 +41,8 @@ double NakagamiModel::calculateReceivedPower(double pSend, double carrierFrequen
 
 	double avg_power = freeSpace(Gt,Gr,L,pSend,waveLength,distance,pathLossAlpha);
 	avg_power = avg_power/1000;
-    return gamma_d(m, avg_power / m, rng) * 1000.0;
+    double prec = gamma_d(m, avg_power / m, rng) * 1000.0;
+     if (prec > pSend)
+     	prec = pSend;
+     return prec;
 }
