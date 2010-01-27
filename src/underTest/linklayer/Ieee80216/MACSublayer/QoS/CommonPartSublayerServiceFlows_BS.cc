@@ -453,9 +453,9 @@ bool CommonPartSublayerServiceFlows_BS::checkQoSParams(sf_QoSParamSet *req_param
 
     int max_sustained_traffic_rate = req_params->max_sustained_traffic_rate;
     int min_reserved_traffic_rate = req_params->min_reserved_traffic_rate;
-    int max_latency = req_params->max_latency;
-    int tolerated_jitter = req_params->tolerated_jitter;
-    int priority = req_params->traffic_priority;
+    //int max_latency = req_params->max_latency;
+    //int tolerated_jitter = req_params->tolerated_jitter;
+    //int priority = req_params->traffic_priority;
     req_tx_policy tx_policy = req_params->request_transmission_policy;
 
     if (link_type == ldMANAGEMENT)
