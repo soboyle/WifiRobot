@@ -1116,7 +1116,7 @@ bool CommonPartSublayerTransceiver::isBroadcastSendRequest(cMessage *msg)
         if (c_info)
         {
             Ieee80216Prim_sendControlRequest *sc_req =
-                dynamic_cast<Ieee80216Prim_sendControlRequest *>(c_info);
+                check_and_cast<Ieee80216Prim_sendControlRequest *>(c_info);
             if (sc_req->getPduCID() == 0xFFFF)
                 return true;
             else
@@ -1125,6 +1125,7 @@ bool CommonPartSublayerTransceiver::isBroadcastSendRequest(cMessage *msg)
         else
             error("ControlRequest enthält keine Kontrollinformationen!");
     }
+    return false;
 }
 
 void CommonPartSublayerTransceiver::recordDatarates()
