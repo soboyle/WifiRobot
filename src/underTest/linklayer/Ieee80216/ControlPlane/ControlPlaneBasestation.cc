@@ -1652,19 +1652,25 @@ void ControlPlaneBasestation::registerInterface()
         return;
 
     char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    // Check if the interface is yet register
-    if (ift->getInterfaceByName(interfaceName) != NULL)
-        return;
-
-    InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: NetworkInterface module's name without special characters ([])
-
     char *d = interfaceName;
     for (const char *s = getParentModule()->getFullName(); *s; s++)
+    {
         if (isalnum(*s))
             *d++ = *s;
+    }
     *d = '\0';
+
+    // FIXME necessary to check this?
+    // Check if the interface is yet register
+    if (ift->getInterfaceByName(interfaceName) != NULL)
+    {
+        delete [] interfaceName;
+        return;
+    }
+
+    InterfaceEntry *e = new InterfaceEntry();
 
     e->setName(interfaceName);
     delete [] interfaceName;
