@@ -239,7 +239,7 @@ void ConvergenceSublayerTrafficClassification::handleUnclassifiedMessage(cMessag
             EV << "Found no matching CID for incoming packets - sending classification command to ControlPlane..\n";
             // TODO: DSD, DSC fehlen noch!
             // CC = Classification Command
-            Ieee80216ClassificationCommand *cc = new Ieee80216ClassificationCommand();
+            Ieee80216ClassificationCommand *cc = new Ieee80216ClassificationCommand("CC_unknown");
             cc->setRequest_type(DSA);
             cc->setTraffic_type(ci->getTraffic_type()); // <-- wahrscheinlich obsolet, da eigentlich nur für QoSParamSet-Werte benötigt..
             cc->setRequested_sf_state(SF_ACTIVE);
@@ -256,6 +256,7 @@ void ConvergenceSublayerTrafficClassification::handleUnclassifiedMessage(cMessag
                 qos->min_reserved_traffic_rate = 0;
                 qos->max_sustained_traffic_rate = 0;
                 qos->max_latency = 0;
+                cc->setName("CC_BE");
                 break;
 
             case UGS:
@@ -263,23 +264,27 @@ void ConvergenceSublayerTrafficClassification::handleUnclassifiedMessage(cMessag
                 qos->min_reserved_traffic_rate = ci->getBitrate();
                 qos->max_latency = voip_max_latency;
                 qos->tolerated_jitter = voip_tolerated_jitter;
+                cc->setName("CC_UGS");
                 break;
 
             case RTPS:
                 qos->max_sustained_traffic_rate = ci->getBitrate();
                 qos->min_reserved_traffic_rate = ci->getBitrate() / 2; // nicht gem. Standard, ggf. unspecified, nichts gefunden
                 qos->max_latency = voip_max_latency;
+                cc->setName("CC_RTPS");
                 break;
 
             case ERTPS:        // erweitert für MobileWiMAX. Siehe Standard.
                 qos->max_sustained_traffic_rate = ci->getBitrate();
                 qos->min_reserved_traffic_rate = ci->getBitrate() / 2;
                 qos->max_latency = voip_max_latency;
+                cc->setName("CC_ERTPS");
                 break;
 
             case NRTPS:
                 qos->min_reserved_traffic_rate = ci->getBitrate();
                 qos->traffic_priority = 1;
+                cc->setName("CC_NRTPS");
                 break;
             }
 
