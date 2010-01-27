@@ -118,7 +118,7 @@ ip_traffic_types CommonPartSublayerAuthorizationModule::getTypeOfServiceFlow(sf_
     else if (min_reserved_traffic_rate == 0 && max_sustained_traffic_rate == 0 && max_latency == 0)
         return BE;
     else
-    	error("Unknown type");
+        throw cRuntimeError("Unknown type in getTypeOfServiceFlow");
 }
 
 void CommonPartSublayerAuthorizationModule::updateDisplay()

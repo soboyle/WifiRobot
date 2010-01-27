@@ -660,6 +660,7 @@ ip_traffic_types CommonPartSublayerServiceFlows_BS::getTypeOfServiceFlow(sf_QoSP
         return NRTPS;
     else if (min_reserved_traffic_rate == 0 && max_sustained_traffic_rate == 0 && max_latency == 0)
         return BE;
+    throw cRuntimeError("unknown ip_traffic_types in getTypeOfServiceFlow");
 }
 
 void CommonPartSublayerServiceFlows_BS::sortServiceFlowsByPriority()
