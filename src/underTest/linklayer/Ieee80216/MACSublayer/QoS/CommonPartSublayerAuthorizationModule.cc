@@ -24,6 +24,8 @@ void CommonPartSublayerAuthorizationModule::handleMessage(cMessage *msg)
 bool CommonPartSublayerAuthorizationModule::checkQoSParams(sf_QoSParamSet *req_params,
                                                            link_direction link_type)
 {
+    bool ret = false;
+
     int max_sustained_traffic_rate = req_params->max_sustained_traffic_rate;
     int min_reserved_traffic_rate = req_params->min_reserved_traffic_rate;
     //int max_latency = req_params->max_latency;
@@ -40,37 +42,39 @@ bool CommonPartSublayerAuthorizationModule::checkQoSParams(sf_QoSParamSet *req_p
         if (availableDatarate[link_type] - max_sustained_traffic_rate >= 0)
         {
             availableDatarate[link_type] -= max_sustained_traffic_rate;
-            return true;
+            ret = true;
         }
         else if (availableDatarate[link_type] - min_reserved_traffic_rate >= 0)
         {
             availableDatarate[link_type] -= min_reserved_traffic_rate;
-            return true;
+            ret = true;
         }
         else
             // TODO jemanden rausschmeissen, ansonsten:
-            return false;
+            ret = false;
         break;
 
     case RTPS:
-        return false;
+        ret = false;
         break;
 
     case NRTPS:
-        return false;
+        ret = false;
         break;
 
     case BE:
-        return false;
+        ret = false;
         break;
 
     case ERTPS:
     case MANAGEMENT:
     default:
-    	error("Unknown value: %s", getTypeOfServiceFlow(req_params));
+        throw cRuntimeError("Unknown value: %s", getTypeOfServiceFlow(req_params));
     }
 
-    updateDisplay();
+    if (ev.isGUI())
+        updateDisplay();
+    return ret;
 }
 
 //void CommonPartSublayerAuthorizationModule::setServiceFlowMap( ServiceFlowMap *sf_map ) {
