@@ -223,6 +223,7 @@ void ControlPlaneBasestation::handleClassificationCommand(Ieee80216Classificatio
 
         getServiceFlowForCID(it->Primary_Management_CID)->state = SF_ACTIVE;
     }
+    delete command;
 }
 
 /**

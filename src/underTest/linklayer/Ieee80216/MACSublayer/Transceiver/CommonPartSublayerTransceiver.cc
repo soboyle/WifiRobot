@@ -137,22 +137,27 @@ void CommonPartSublayerTransceiver::handleMessage(cMessage *msg)
         EV << "von controlPlaneGateIn " << msg <<
             " an die Funktion handleControlPlaneMsg() gesendet.\n";
         handleControlPlaneMsg(msg);
+        return;
     }
-    else if (msg->getArrivalGateId() == schedulingGateIn) // Nachricht vom CS
+
+    if (msg->getArrivalGateId() == schedulingGateIn) // Nachricht vom CS
     {
         EV << "von schedulingGateIn " << msg <<
             " an die Funktion handleUpperSublayerMsg() gesendet.\n";
         handleUpperSublayerMsg(msg);
+        return;
     }
-    else if (msg->isSelfMessage())
+
+    if (msg->isSelfMessage())
     {
         EV << "is Selfmessage: " << msg->getName() << endl;
         if (msg == per_second_timer)
         {
             recordDatarates();
             scheduleAt(simTime() + 1, per_second_timer);
+            return;
         }
-        else
+
         {
             cPolymorphic *c_info = msg->getControlInfo();
             Ieee80216Prim_sendControlRequest *sc_req;
@@ -167,15 +172,15 @@ void CommonPartSublayerTransceiver::handleMessage(cMessage *msg)
                 if (!managementQueuesEmpty(sc_req))
                 {
                     handleWithFSM(msg);
+                    return;
                 }
-
             }
         }
+        return;
     }
-    else
-    {
-        EV << "nothing" << endl;
-    }
+
+	error("Unhandled message: %s (type: %s)",msg->getName(),msg->getClassName());
+	delete msg;
 }
 
 /**
@@ -373,6 +378,7 @@ void CommonPartSublayerTransceiver::handleControlRequest(cMessage *msg)
     {
         error("In Control Request nicht enthalten: (%s)%s msgkind=%d", msg->getClassName(),
               msg->getName(), msg->getKind());
+        delete ctrl;
     }
 }
 

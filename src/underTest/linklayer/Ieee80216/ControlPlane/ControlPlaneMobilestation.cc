@@ -374,8 +374,8 @@ void ControlPlaneMobilestation::handleClassificationCommand(Ieee80216Classificat
     else
     {
         EV << "State=  not CONNECTED" << endl;
-        delete command;
     }
+    delete command;
 }
 
 /**
