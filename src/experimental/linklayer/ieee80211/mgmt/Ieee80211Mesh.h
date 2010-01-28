@@ -27,7 +27,7 @@
 #include "LWMPLSPacket_m.h"
 #include "uint128.h"
 #include "ManetRoutingBase.h"
-
+#include "Ieee80211Etx.h"
 
 /**
  * Used in 802.11 ligh wireless mpls  mode. See corresponding NED file for a detailed description.
@@ -51,6 +51,7 @@ class INET_API Ieee80211Mesh : public Ieee80211MgmtBase
 
 	ManetRoutingBase *routingModuleProactive;
 	ManetRoutingBase *routingModuleReactive;
+	Ieee80211Etx * ETXProcess;
 
 	IInterfaceTable *ift;
 	bool useLwmpls;
@@ -91,6 +92,9 @@ class INET_API Ieee80211Mesh : public Ieee80211MgmtBase
 
 
     virtual void handleMessage(cMessage*);
+
+    /** Implements abstract to use ETX packets */
+    virtual void handleEtxMessage(cPacket*);
 
     /** Implements abstract to use routing protocols in the mac layer */
     virtual void handleRoutingMessage(cPacket*);

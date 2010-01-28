@@ -32,6 +32,7 @@ simple Ieee80211Mesh
         int maxHopReactive=default(-1); // Maximun number of hops by the reactive part for to use the proactive feedback, not used yet, TO-DO
         double maxDelay=default(0.1);
         int maxTTL=default(32); // the same that IP
+        bool ETXEstimate=default(false);
  //       int Willingness = default(3); //ms
  //       int Hello_ival = default(2); // sec
  //       int Tc_ival = default(5); // sec
@@ -39,6 +40,8 @@ simple Ieee80211Mesh
  //       int use_mac = default(0);
 
     gates:
+        input  ETXProcIn;
+        output ETXProcOut;
         input  routingInProactive;
         output routingOutProactive;
         input  routingInReactive;

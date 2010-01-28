@@ -84,6 +84,7 @@ void Ieee80211Mesh::initialize(int stage)
 
     if (stage==1)
     {
+
 		limitDelay = par("maxDelay").doubleValue();
 		mplsData = new LWMPLSDataStructure;
 		maxTTL=par("maxTTL");
@@ -103,10 +104,10 @@ void Ieee80211Mesh::initialize(int stage)
 		// cambio para evitar que puedan estar los dos protocolos simultaneamente
 		// cuidado con esto
 		//
-/*
+
 		if (useReactive)
 			useProactive = false;
-*/
+
 		if (useReactive && useProactive)
 		{
 			proactiveFeedback  = par("ProactiveFeedback");
@@ -149,6 +150,19 @@ void Ieee80211Mesh::initialize(int stage)
 
 		mplsData->mplsMaxTime()=35;
 		active_mac_break=false;
+
+		ETXProcess = NULL;
+        if (par("ETXEstimate"))
+    	{
+    		moduleType = cModuleType::find("inet.experimental.linklayer.ieee80211.mgmt.Ieee80211Etx");
+    		module = moduleType->create("ETXproc", this);
+    		ETXProcess = dynamic_cast <Ieee80211Etx*> (module);
+    		ETXProcess->gate("toMac")->connectTo(gate("ETXProcIn"));
+    		gate("ETXProcOut")->connectTo(ETXProcess->gate("fromMac"));
+    		ETXProcess->buildInside();
+    		ETXProcess->scheduleStart(simTime());
+    		ETXProcess->setAddress(myAddress);
+    	}
 	}
 	if (stage==4)
 	{
@@ -202,6 +216,10 @@ void Ieee80211Mesh::handleMessage(cMessage *msg)
     else if (strstr(gateName,"routingIn")!=NULL)
     {
         handleRoutingMessage(PK(msg));
+    }
+    else if (strstr(gateName,"ETXProcIn")!=NULL)
+    {
+        handleEtxMessage(PK(msg));
     }
     else
     {
@@ -546,6 +564,22 @@ void Ieee80211Mesh::handleDataFrame(Ieee80211DataFrame *frame)
     if (frame2)
     	ttl = frame2->getTTL();
 	cPacket *msg = decapsulate(frame);
+	///
+	/// If it's a ETX packet to send to the appropriate module
+	///
+	if (dynamic_cast<ETXBasePacket*>(msg))
+	{
+		if (ETXProcess)
+		{
+			if (msg->getControlInfo())
+				delete msg->removeControlInfo();
+			send(msg,"ETXProcOut");
+		}
+		else
+			delete msg;
+		return;
+	}
+
 	LWMPLSPacket *lwmplspk = dynamic_cast<LWMPLSPacket*> (msg);
 	mplsData->lwmpls_refresh_mac(MacToUint64(source),simTime());
 
@@ -2038,3 +2072,18 @@ void Ieee80211Mesh::sendOrEnqueue(cPacket *frame)
 	actualizeReactive(frame,true);
     PassiveQueueBase::handleMessage(frame);
 }
+
+void Ieee80211Mesh::handleEtxMessage(cPacket *pk)
+{
+	ETXBasePacket * etxMsg = dynamic_cast<ETXBasePacket*>(pk);
+	if (etxMsg)
+	{
+	    Ieee80211DataFrame * frame = encapsulate(etxMsg,etxMsg->getDest());
+	    if (frame)
+	    	sendOrEnqueue(frame);
+	}
+	else
+		delete pk;
+}
+
+
