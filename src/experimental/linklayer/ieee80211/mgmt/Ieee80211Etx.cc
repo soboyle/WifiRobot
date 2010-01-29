@@ -152,7 +152,7 @@ double Ieee80211Etx::getEtx(const MACAddress &add)
 	MacEtxNeighbor *neig;
 	if (it==neighbors.end())
 	{
-		return 1e10;
+		return -1;
 	}
 	else
 	{
@@ -166,7 +166,7 @@ double Ieee80211Etx::getEtx(const MACAddress &add)
 		if (pr>1) pr=1;
 		if (ps>1) ps=1;
 		if (ps ==0 || pr==0)
-			return 1e10;
+			return 1e100;
 		return 1/(ps*pr);
 	}
 }
@@ -177,13 +177,13 @@ double Ieee80211Etx::getEtt(const MACAddress &add)
 	MacEtxNeighbor *neig;
 	if (it==neighbors.end())
 	{
-		return 1e10;
+		return -1;
 	}
 	else
 	{
 		neig = it->second;
 		if (neig->timeETT.empty())
-			return 0;
+			return -1;
 		int expectedPk = etxMeasureInterval/etxInterval;
 		while (!neig->timeVector.empty() && (simTime()-neig->timeVector.front() >  etxMeasureInterval))
 			neig->timeVector.erase(neig->timeVector.begin());
@@ -193,7 +193,7 @@ double Ieee80211Etx::getEtt(const MACAddress &add)
 		if (pr>1) pr=1;
 		if (ps>1) ps=1;
 		if (ps ==0 || pr==0)
-			return 1e10;
+			return 1e100;
 		double etx =  1/(ps*pr);
 		simtime_t minTime = 100.0;
 		for (unsigned int i =0;i<neig->timeETT.size();i++)
