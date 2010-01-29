@@ -40,9 +40,19 @@ private:
 	int     packets;
 	int     numFailures;
 public:
-	MacEtxNeighbor(){packets = 0; time=0;numFailures=0;}
 	std::vector<simtime_t> timeVector;
 	std::vector<simtime_t> timeETT;
+	std::vector<double> pRec;// power received
+	std::vector<double> signalToNoise;// S/N received
+public:
+	MacEtxNeighbor(){packets = 0; time=0;numFailures=0;}
+	~MacEtxNeighbor(){
+		timeVector.clear();
+		timeETT.clear();
+		pRec.clear();
+		signalToNoise.clear();
+	}
+	// this vector store a window of values
 	void setAddress(const MACAddress &addr){address = addr;}
 	MACAddress getAddress() const {return address;}
 	void setTime(const simtime_t &t){time = t;}
@@ -81,6 +91,8 @@ class INET_API Ieee80211Etx : public cSimpleModule,public MacEstimateCostProcess
 	simtime_t maxLive;
 	MACAddress prevAddress;
 	simtime_t  prevTime;
+	int powerWindow;
+
   protected:
     virtual int numInitStages() const {return 3;}
     virtual void initialize(int);
@@ -94,19 +106,36 @@ class INET_API Ieee80211Etx : public cSimpleModule,public MacEstimateCostProcess
     virtual void handleBwMessage(MACBwPacket *);
 	double getEtt(const MACAddress &add);
 	double getEtx(const MACAddress &add);
+	double getPrec(const MACAddress &add);
+	double getSignalToNoise(const MACAddress &add);
+
 	virtual void receiveChangeNotification(int category, const cPolymorphic *details);
   public:
 	Ieee80211Etx(){};
 	void setAddress(const MACAddress &add) {myAddress = add;}
 	virtual double getCost(int i,MACAddress &add)
 	{
-		if (!i)
+		switch (i)
+		{
+		case 0:
 			return getEtt(add);
-		else
+		break;
+		case 1:
 			return getEtx(add);
+		break;
+		case 2:
+			return getPrec(add);
+		break;
+		case 3:
+			return getSignalToNoise(add);
+		break;
+		default:
+			return -1;
+		break;
+		}
 	}
 
-	virtual double getNumCost(){return 3;}
+	virtual double getNumCost(){return 4;}
 	virtual int getNumNeighbors(){return neighbors.size();}
 	virtual int getNeighbors(MACAddress add[])
 	{

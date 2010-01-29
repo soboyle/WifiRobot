@@ -19,6 +19,7 @@
 #include "InterfaceTableAccess.h"
 #include "Ieee80211Etx.h"
 #include "Ieee80211Frame_m.h"
+#include "Radio80211aControlInfo_m.h"
 
 Define_Module(Ieee80211Etx);
 
@@ -35,6 +36,7 @@ void Ieee80211Etx::initialize(int stage)
 		ettSize1 = par("ETTSize1");
 		ettSize2 = par("ETTSize2");
 		maxLive = par("TimeToLive");
+		powerWindow = par("powerWindow");
 		NotificationBoard *nb = NotificationBoardAccess().get();
 		nb->subscribe(this, NF_LINK_BREAK);
 		nb->subscribe(this, NF_LINK_FULL_PROMISCUOUS);
@@ -163,7 +165,9 @@ double Ieee80211Etx::getEtx(const MACAddress &add)
 		double ps = neig->getPackets()/expectedPk;
 		if (pr>1) pr=1;
 		if (ps>1) ps=1;
-		return 1-((1-pr)*(1-ps));
+		if (ps ==0 || pr==0)
+			return 1e10;
+		return 1/(ps*pr);
 	}
 }
 
@@ -177,9 +181,9 @@ double Ieee80211Etx::getEtt(const MACAddress &add)
 	}
 	else
 	{
-		if (!neig->timeETT.size())
-			return 0;
 		neig = it->second;
+		if (neig->timeETT.empty())
+			return 0;
 		int expectedPk = etxMeasureInterval/etxInterval;
 		while (!neig->timeVector.empty() && (simTime()-neig->timeVector.front() >  etxMeasureInterval))
 			neig->timeVector.erase(neig->timeVector.begin());
@@ -188,13 +192,57 @@ double Ieee80211Etx::getEtt(const MACAddress &add)
 		double ps = neig->getPackets()/expectedPk;
 		if (pr>1) pr=1;
 		if (ps>1) ps=1;
-		double etx = 1-((1-pr)*(1-ps));
+		if (ps ==0 || pr==0)
+			return 1e10;
+		double etx =  1/(ps*pr);
 		simtime_t minTime = 100.0;
 		for (unsigned int i =0;i<neig->timeETT.size();i++)
 			if (minTime>neig->timeETT[i])
 				minTime=neig->timeETT[i];
 		double bw= ettSize2/minTime;
 		return etx*(etxSize/bw);
+	}
+}
+
+double Ieee80211Etx::getPrec(const MACAddress &add)
+{
+	NeighborsMap::iterator it = neighbors.find(add);
+	MacEtxNeighbor *neig;
+	if (it==neighbors.end())
+	{
+		return 0;
+	}
+	else
+	{
+		neig = it->second;
+		if (neig->pRec.empty())
+			return 0;
+
+		double sum=0;
+		for (unsigned int i =0;i<neig->pRec.size();i++)
+			sum += neig->pRec[0];
+		return sum/neig->pRec.size();
+	}
+}
+
+double Ieee80211Etx::getSignalToNoise(const MACAddress &add)
+{
+	NeighborsMap::iterator it = neighbors.find(add);
+	MacEtxNeighbor *neig;
+	if (it==neighbors.end())
+	{
+		return 0;
+	}
+	else
+	{
+		neig = it->second;
+		if (neig->signalToNoise.empty())
+			return 0;
+
+		double sum=0;
+		for (unsigned int i =0;i<neig->signalToNoise.size();i++)
+			sum += neig->signalToNoise[0];
+		return sum/neig->signalToNoise.size();
 	}
 }
 
@@ -300,13 +348,25 @@ void Ieee80211Etx::receiveChangeNotification(int category, const cPolymorphic *d
 				neighbors.erase(it);
 			}
 		}
-
 	}
 	else if (category == NF_LINK_FULL_PROMISCUOUS)
 	{
 		NeighborsMap::iterator it = neighbors.find(frame->getReceiverAddress());
 		if (it!=neighbors.end())
 			it->second->setNumFailures(0);
+		if (powerWindow>0)
+		{
+			Radio80211aControlInfo * cinfo = dynamic_cast<Radio80211aControlInfo *> (frame->getControlInfo());
+			if (cinfo)
+			{
+				it->second->pRec.push_back(cinfo->getSnr());
+				it->second->signalToNoise.push_back(cinfo->getRecPow());
+				while ((int)it->second->pRec.size()>powerWindow)
+					it->second->pRec.erase(it->second->pRec.begin());
+				while ((int)it->second->signalToNoise.size()>powerWindow)
+					it->second->signalToNoise.erase(it->second->signalToNoise.begin());
+			}
+		}
 	}
 }
 
