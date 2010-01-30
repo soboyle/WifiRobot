@@ -805,7 +805,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cPolymorphi
 			ControlInfoBreakLink *add = new ControlInfoBreakLink;
 			add->setDest(frame->getReceiverAddress());
 			pkt->setControlInfo(add);
-			processLinkBreak(details);
+			processLinkBreak(pkt);
 			delete pkt;
 	    }
 		else
