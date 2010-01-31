@@ -212,7 +212,7 @@ NS_STATIC NS_INLINE int re_info_type(struct re_block *b, rtable_entry_t *e, u_in
 			if (e->rt_state != RT_VALID)
 				return RB_PROACTIVE;
 
-			if (sub < 0 && e->rt_hopcnt != 0 && b->re_hopcnt != 0 && b->re_hopcnt < e->rt_hopcnt)
+			if (sub == 0 && e->rt_hopcnt != 0 && b->re_hopcnt != 0 && b->re_hopcnt < e->rt_hopcnt)
 				return RB_PROACTIVE;
 		}
 

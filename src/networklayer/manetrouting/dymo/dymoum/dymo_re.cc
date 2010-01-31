@@ -373,8 +373,8 @@ int NS_CLASS re_process_block(struct re_block *block, u_int8_t is_rreq,
 		return -1;
 	}
 	// Create/update a route towards RENodeAddress
-	if (entry &&  rb_state == RB_PROACTIVE && (((int32_t) seqnum) - ((int32_t) entry->rt_seqnum))<0)
-		seqnum = entry->rt_seqnum;
+	//if (entry &&  rb_state == RB_PROACTIVE && (((int32_t) seqnum) - ((int32_t) entry->rt_seqnum))<0)
+	//	seqnum = entry->rt_seqnum;
 
 	if (entry)
 		rtable_update(
@@ -806,12 +806,13 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
 		for (i =0; i<sizeVector;i++)
 		{
 			node_addr.s_addr	= controlInfo->getVectorAddress(i);
+			uint32_t seqNum = *mapSeqNum[node_addr.s_addr];
 			entry			= rtable_find(node_addr);
 			if (entry)
 			{
 				if (entry->rt_hopcnt>i+1 || entry->rt_hopcnt==0)
 				{
-					rtable_update(entry,node_addr,next_addr,ifindex,entry->rt_seqnum,entry->rt_prefix,i+1,0);
+					rtable_update(entry,node_addr,next_addr,ifindex,seqNum,entry->rt_prefix,i+1,0);
 				}
 			}
 			else
@@ -820,7 +821,7 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
 						node_addr,		// dest
 						next_addr,		// nxt hop
 					ifindex,	// iface
-					1,		// seqnum
+					seqNum,		// seqnum
 					0,		// prefix
 					i+1,		// hop count
 					0);		// is gw
@@ -860,12 +861,16 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
 		rrep_src->newBocks(sizeVector);
 		for (int i = sizeVector-1;i>0;i--)
 		{
-			rrep_src->re_blocks[i].g		= 0;
-			rrep_src->re_blocks[i].prefix		= 0;
+			node_addr.s_addr	= controlInfo->getVectorAddress(i);
+			entry			= rtable_find(node_addr);
+			if (!entry)
+				error("Entry not found");
+			rrep_src->re_blocks[i].g		= entry->rt_is_gw;
+			rrep_src->re_blocks[i].prefix		= entry->rt_prefix;
 			rrep_src->re_blocks[i].res		= 0;
-			rrep_src->re_blocks[i].re_hopcnt	= i;
-			rrep_src->re_blocks[i].re_node_seqnum	= 0;
-			rrep_src->re_blocks[i].re_node_addr	=controlInfo->getVectorAddress(i);
+			rrep_src->re_blocks[i].re_hopcnt	= entry->rt_hopcnt;
+			rrep_src->re_blocks[i].re_node_seqnum	= entry->rt_seqnum;
+			rrep_src->re_blocks[i].re_node_addr	= node_addr.s_addr;
 			rrep_src->re_blocks[i].from_proactive=1;
 			rrep_src->len += RE_BLOCK_SIZE;
 		}

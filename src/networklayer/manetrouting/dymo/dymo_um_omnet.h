@@ -143,6 +143,9 @@ private:
 	typedef std::multimap<simtime_t, struct timer*> DymoTimerMap;
 	typedef std::map<Uint128, rtable_entry_t *> DymoRoutingTable;
 
+	// this static map simulate the exchange of seq num by the proactive protocol.
+	static std::map<Uint128,u_int32_t *> mapSeqNum;
+
 	MacToIpAddress macToIpAdress;
 	DymoTimerMap dymoTimerList;
 	DymoRoutingTable dymoRoutingTable;
@@ -200,7 +203,7 @@ private:
 public:
 	static int  log_file_fd;
 	static bool log_file_fd_init;
-	DYMOUM(){attachPacket=false; is_init =false; log_file_fd_init=false;ipNodeId=NULL;gateWayAddress=NULL;numInterfacesActive=0;timer_elem=0;sendMessageEvent = new cMessage();/*&messageEvent;*/}
+	DYMOUM(){attachPacket=false; is_init =false; log_file_fd_init=false;ipNodeId=NULL;gateWayAddress=NULL;numInterfacesActive=0;timer_elem=0;sendMessageEvent = new cMessage();/*&messageEvent;*/mapSeqNum.clear();}
 	~DYMOUM();
 	void packetFailed(IPDatagram *);
 	void packetFailedMac(Ieee80211DataFrame *);

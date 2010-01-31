@@ -64,6 +64,7 @@ int DYMOUM::totalRrepAckSend=0;
 int DYMOUM::totalRrepAckRec=0;
 int DYMOUM::totalRerrSend=0;
 int DYMOUM::totalRerrRec=0;
+std::map<Uint128,u_int32_t *> DYMOUM::mapSeqNum;
 
 void DYMOUM::initialize(int stage)
 {
@@ -119,6 +120,10 @@ void DYMOUM::initialize(int stage)
 				DEV_NR(i).ipaddr.s_addr = getInterfaceEntry(i)->getMacAddress();
 			else
 				DEV_NR(i).ipaddr.s_addr = getInterfaceEntry(i)->ipv4Data()->getIPAddress().getInt();
+			if (isInMacLayer())
+			{
+				mapSeqNum[DEV_NR(i).ipaddr.s_addr]=&this_host.seqnum;
+			}
 		}
 /* Set network interface parameters */
 		for (int i=0;i < getNumWlanInterfaces();i++)
