@@ -75,7 +75,10 @@ void ConstSpeedMobility::handleSelfMsg(cMessage * msg)
  */
 void ConstSpeedMobility::setTargetPosition()
 {
-    targetPos = getRandomPosition();
+    targetPos = p=323,49;
+
+    //distanceStep = vHost * updateInterval
+
     double distance = pos.distance(targetPos);
     double totalTime = distance / vHost;
     numSteps = FWMath::round(totalTime / updateInterval);
@@ -99,6 +102,38 @@ void ConstSpeedMobility::move()
 
     if (step <= numSteps)
     {
+    	/**
+    	 * xNew = distanceStep * (pos.x / distance)
+    	 * yNew = distanceStep * (pos.y / distance)
+    	 *
+    	 * j = 1
+    	 * xEstA = 1
+    	 * yEstA = 1
+    	 * for( j <= 3){
+    	 * handleLowerMsgStart()
+    	 *
+    	 * D1j = 10^((s1j - 220) / 10)
+    	 * D2j = 10^((s2j - 220) / 10)
+    	 * D3j = 10^((s3j - 220) / 10)
+    	 *
+    	 * P2 = (D2j^2 - D3j^2) - (323^2 - 323^2) - (200^2 - 49^2)
+    	 * yu = (P2 -(323 - 323)*xu) / 446
+    	 *
+    	 * P1 = (D1j^2 - D3j^2) - (100^2 - 323^2) - (200^2 - 49^2)
+    	 * xu = (P1 -(-151)*yu) / 446
+    	 *
+    	 * xEstA = xu - xNew
+    	 * yEstA = yu - yNew
+    	 *
+    	 * j++
+    	 * A++
+    	 * }
+    	 * The one with the least xestA and YestA will be our new position
+    	 * hence need to analyze which one is least and put
+    	 * pos = answer here, get rid of pos below as it updates the new position of host by adding
+    	 * current position plus the step size.
+    	 * calculate a new random position
+    	 */
         EV << "stepping forward. step #=" << step << " xpos= " << pos.x << " ypos=" << pos.
             y << endl;
 
